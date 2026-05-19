@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flights | Expedia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    :root { --blue:#003580; --blue2:#006fcf; --yellow:#ffc72c; --bg:#f4f7fb; --card:#fff; --text:#111827; --muted:#6b7280; --line:#dbe3ee; --green:#166534; --red:#991b1b; --orange:#b45309; --font:'Poppins',Arial,sans-serif; }
+    body { font-family:var(--font); background:var(--bg); color:var(--text); min-height:100vh; }
+    .topbar { height:68px; background:var(--blue); color:white; display:flex; align-items:center; justify-content:space-between; padding:0 7%; position:sticky; top:0; z-index:20; }
+    .brand { display:flex; align-items:center; gap:10px; text-decoration:none; color:white; font-size:21px; font-weight:800; }
+    .brand-mark { width:33px; height:33px; border-radius:9px; background:var(--yellow); color:var(--blue); display:grid; place-items:center; }
+    .nav-right { display:flex; align-items:center; gap:14px; font-size:13px; }
+    .nav-right a { color:white; text-decoration:none; border:1px solid rgba(255,255,255,.7); border-radius:999px; padding:8px 14px; font-weight:700; }
+    .hero { background:linear-gradient(135deg, rgba(0,53,128,.95), rgba(0,111,207,.86)), url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1600&q=80') center/cover; color:white; padding:48px 7% 94px; }
+    .hero h1 { font-size:clamp(34px,5vw,56px); line-height:1.05; letter-spacing:-1.4px; max-width:800px; margin-bottom:14px; }
+    .hero p { max-width:720px; color:rgba(255,255,255,.84); line-height:1.8; font-size:15px; }
+    .page { width:min(1180px, 92%); margin:-58px auto 48px; }
+    .message { padding:13px 15px; border-radius:12px; margin-bottom:16px; font-size:13px; }
+    .success { background:#dcfce7; color:var(--green); border:1px solid #bbf7d0; }
+    .error { background:#fee2e2; color:var(--red); border:1px solid #fecaca; }
+    .search-card { background:white; border:1px solid var(--line); border-radius:24px; padding:24px; box-shadow:0 18px 46px rgba(17,24,39,.14); margin-bottom:24px; }
+    .search-card h2 { color:var(--blue); margin-bottom:6px; font-size:22px; }
+    .search-card p { color:var(--muted); font-size:13px; line-height:1.6; margin-bottom:18px; }
+    .search-form { display:grid; grid-template-columns:1fr 1fr 190px 140px; gap:14px; align-items:end; }
+    label { display:block; font-size:12px; color:#374151; font-weight:800; margin-bottom:7px; }
+    input { width:100%; height:48px; border:1px solid var(--line); border-radius:14px; padding:0 14px; font:inherit; outline:none; }
+    input:focus { border-color:var(--blue2); box-shadow:0 0 0 4px rgba(0,111,207,.12); }
+    button { height:48px; border:none; border-radius:14px; background:var(--yellow); color:var(--blue); font-weight:800; font-family:inherit; cursor:pointer; padding:0 16px; }
+    button:hover { filter:brightness(.98); transform:translateY(-1px); }
+    .content-grid { display:grid; grid-template-columns:1.18fr .82fr; gap:24px; align-items:start; }
+    .panel { background:white; border:1px solid var(--line); border-radius:22px; overflow:hidden; box-shadow:0 10px 28px rgba(17,24,39,.06); }
+    .panel-head { padding:19px 22px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .panel-head h2 { color:var(--blue); font-size:20px; }
+    .panel-head span { color:var(--muted); font-size:12px; }
+    .flight-list { display:grid; gap:14px; padding:18px; }
+    .flight-card { border:1px solid #e5eaf2; border-radius:18px; padding:18px; display:grid; grid-template-columns:1fr auto; gap:18px; align-items:center; }
+    .route { display:flex; align-items:center; gap:14px; margin-bottom:10px; }
+    .city { font-size:20px; font-weight:800; color:var(--blue); }
+    .arrow { height:1px; flex:0 0 60px; background:#cbd5e1; position:relative; }
+    .arrow::after { content:'›'; position:absolute; right:-6px; top:-13px; color:#94a3b8; font-size:24px; }
+    .meta { color:var(--muted); font-size:12px; line-height:1.7; }
+    .provider { display:inline-block; margin-top:8px; background:#eff6ff; color:var(--blue); border-radius:999px; padding:6px 10px; font-size:11px; font-weight:800; }
+    .book-box { min-width:180px; background:#f8fafc; border:1px solid var(--line); border-radius:16px; padding:14px; }
+    .book-box input { height:42px; margin-bottom:10px; }
+    .book-box button { width:100%; height:42px; }
+    .empty { padding:30px; color:var(--muted); text-align:center; font-size:13px; }
+    table { width:100%; border-collapse:collapse; }
+    th,td { padding:13px 15px; text-align:left; border-bottom:1px solid #eef2f7; font-size:12px; vertical-align:top; }
+    th { background:#f8fafc; color:#374151; text-transform:uppercase; letter-spacing:.35px; font-weight:800; }
+    .status { display:inline-block; border-radius:999px; padding:6px 10px; font-size:10px; font-weight:800; text-transform:uppercase; background:#fff7ed; color:var(--orange); }
+    .status.approved, .status.paid { background:#dcfce7; color:var(--green); }
+    .status.rejected { background:#fee2e2; color:var(--red); }
+    .pay-btn { height:36px; border-radius:10px; font-size:12px; }
+    .receipt-link { color:var(--blue2); text-decoration:none; font-weight:800; }
+    @media(max-width:1000px){ .search-form,.content-grid{grid-template-columns:1fr;} .page{margin-top:-42px;} }
+    @media(max-width:640px){ .topbar{padding:0 18px;} .hero{padding:34px 22px 80px;} .flight-card{grid-template-columns:1fr;} .route{align-items:flex-start; flex-direction:column;} .arrow{display:none;} }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" th:href="@{/}"><span class="brand-mark">E</span><span>expedia</span></a>
+  <div class="nav-right"><span th:text="${userName}">User Name</span><a th:href="@{/logout}">Logout</a></div>
+</header>
+
+<section class="hero">
+  <h1>Approved flights are ready for your next trip.</h1>
+  <p>Available flights load automatically after login. You can still search by route and date to narrow the approved marketplace results.</p>
+</section>
+
+<main class="page">
+  <div th:if="${successMessage}" class="message success" th:text="${successMessage}"></div>
+  <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}"></div>
+
+  <section class="search-card">
+    <h2>Find flights</h2>
+    <p>Approved flights are already listed below. Use the search fields only when you want to filter by route and travel date.</p>
+    <form class="search-form" th:action="@{/userDashboard}" method="get">
+      <div><label for="origin">Leaving from</label><input id="origin" type="text" name="origin" placeholder="Cebu" th:value="${origin}" required/></div>
+      <div><label for="destination">Going to</label><input id="destination" type="text" name="destination" placeholder="Manila" th:value="${destination}" required/></div>
+      <div><label for="flightDate">Departing</label><input id="flightDate" type="date" name="flightDate" th:value="${flightDate}" required/></div>
+      <button type="submit">Search</button>
+    </form>
+  </section>
+
+  <div class="content-grid">
+    <section class="panel">
+      <div class="panel-head"><h2>Available flights</h2><span>Approved marketplace results</span></div>
+      <div class="flight-list" th:if="${availableFlights != null and !#lists.isEmpty(availableFlights)}">
+        <article class="flight-card" th:each="flight : ${availableFlights}">
+          <div>
+            <div class="route"><span class="city" th:text="${flight.origin}">CEB</span><span class="arrow"></span><span class="city" th:text="${flight.destination}">MNL</span></div>
+            <div class="meta">
+              <strong th:text="${flight.flightNumber}">EX123</strong> ·
+              <span th:text="${flight.flightDate}">2026-06-01</span> ·
+              <span th:text="${flight.flightTime}">10:00</span> ·
+              <span th:text="${flight.maximumSeatCapacity}">180</span> seats
+            </div>
+            <span class="provider" th:text="${flight.flightProvider != null ? flight.flightProvider.companyName : 'Approved provider'}">Provider</span>
+          </div>
+          <form class="book-box" th:action="@{/userDashboard/bookFlight}" method="post">
+            <input type="hidden" name="flightId" th:value="${flight.id}"/>
+            <label>Passengers</label>
+            <input type="number" name="passengerCount" min="1" value="1" required/>
+            <button type="submit">Request booking</button>
+          </form>
+        </article>
+      </div>
+      <div th:if="${availableFlights == null or #lists.isEmpty(availableFlights)}" class="empty">No approved flights available yet. Once providers, airplanes, and flights are approved, they will appear here automatically.</div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head"><h2>My bookings</h2><span>Track approval, payment, and receipt</span></div>
+      <table th:if="${myBookings != null and !#lists.isEmpty(myBookings)}">
+        <thead><tr><th>Flight</th><th>Passengers</th><th>Status</th><th>Payment</th><th>Action</th></tr></thead>
+        <tbody>
+          <tr th:each="booking : ${myBookings}">
+            <td><strong th:text="${booking.flight.flightNumber}">EX123</strong><br/><span th:text="${booking.flight.origin + ' → ' + booking.flight.destination}">Route</span></td>
+            <td th:text="${booking.passengerCount}">1</td>
+            <td><span class="status" th:classappend="${booking.bookingStatus == 'Approved'} ? ' approved' : (${booking.bookingStatus == 'Paid'} ? ' paid' : (${booking.bookingStatus == 'Rejected'} ? ' rejected' : ''))" th:text="${booking.bookingStatus}">Pending</span></td>
+            <td><span class="status" th:classappend="${booking.paymentStatus == 'Paid'} ? ' paid' : ''" th:text="${booking.paymentStatus}">Unpaid</span></td>
+            <td>
+              <form th:if="${booking.bookingStatus == 'Approved'}" th:action="@{/userDashboard/payBooking/{id}(id=${booking.bookingId})}" method="post"><button class="pay-btn" type="submit">Pay now</button></form>
+              <a class="receipt-link" th:if="${booking.paymentStatus == 'Paid'}" th:href="@{/userDashboard/receipt/{id}(id=${booking.bookingId})}">View receipt</a>
+              <span th:if="${booking.bookingStatus != 'Approved' and booking.paymentStatus != 'Paid'}" style="color:#6b7280;">Waiting</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div th:if="${myBookings == null or #lists.isEmpty(myBookings)}" class="empty">No bookings yet.</div>
+    </section>
+  </div>
+</main>
+</body>
+</html>

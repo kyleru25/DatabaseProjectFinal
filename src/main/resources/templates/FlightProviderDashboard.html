@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Flight Provider Dashboard | Expedia</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --blue: #003580;
+      --yellow: #ffc72c;
+      --light-blue: #006fcf;
+      --white: #ffffff;
+      --gray-bg: #f5f7fa;
+      --gray-mid: #d1d5db;
+      --gray-soft: #eef2f7;
+      --gray-text: #6b7280;
+      --text: #222222;
+      --green: #2e7d32;
+      --red: #c62828;
+      --font: 'Poppins', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--gray-bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    nav {
+      height: 64px;
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      text-decoration: none;
+    }
+
+    .logo svg {
+      width: 120px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-actions a {
+      color: rgba(255,255,255,.85);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      transition: background .2s;
+    }
+
+    .nav-actions a:hover {
+      background: rgba(255,255,255,.15);
+      color: var(--white);
+    }
+
+    .logout-btn {
+      border: 1.5px solid rgba(255,255,255,.85);
+      font-weight: 600;
+    }
+
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+
+    .sidebar {
+      background: var(--white);
+      border-right: 1px solid var(--gray-mid);
+      padding: 26px 20px;
+    }
+
+    .provider-card {
+      background: linear-gradient(135deg, #003580, #006fcf);
+      color: var(--white);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .provider-card h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .provider-card p {
+      font-size: 12px;
+      color: rgba(255,255,255,.8);
+      line-height: 1.5;
+    }
+
+    .side-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .side-menu a {
+      text-decoration: none;
+      color: #333;
+      font-size: 13px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      transition: background .2s, color .2s;
+    }
+
+    .side-menu a:hover,
+    .side-menu a.active {
+      background: #eff6ff;
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .main-content {
+      padding: 32px;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .header-row h1 {
+      font-size: 30px;
+      color: var(--blue);
+      margin-bottom: 6px;
+    }
+
+    .header-row p {
+      font-size: 14px;
+      color: var(--gray-text);
+      line-height: 1.6;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--gray-mid);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.04);
+    }
+
+    .stat-card span {
+      display: block;
+      font-size: 12px;
+      color: var(--gray-text);
+      margin-bottom: 8px;
+    }
+
+    .stat-card strong {
+      font-size: 26px;
+      color: var(--blue);
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--gray-mid);
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.06);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 18px 22px;
+      background: var(--blue);
+      color: var(--white);
+    }
+
+    .panel-header.with-action {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .header-action-btn {
+      background: var(--yellow);
+      color: var(--blue);
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 9px 14px;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .panel-header h2 {
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .panel-header p {
+      font-size: 12px;
+      color: rgba(255,255,255,.75);
+    }
+
+    .panel-body {
+      padding: 22px;
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 100px;
+      overflow: hidden;
+      transition:
+        opacity .35s ease,
+        transform .35s ease,
+        max-height .35s ease,
+        margin .35s ease,
+        padding .35s ease,
+        border-width .35s ease;
+    }
+
+    .message.success {
+      background: #e8f5e9;
+      color: var(--green);
+      border: 1px solid #c8e6c9;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: var(--red);
+      border: 1px solid #ffcdd2;
+    }
+
+    .message.hide {
+      opacity: 0;
+      transform: translateY(-8px);
+      max-height: 0;
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-width: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 12px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1.5px solid var(--gray-mid);
+      border-radius: 10px;
+      padding: 11px 13px;
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+      background: var(--white);
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--light-blue);
+      box-shadow: 0 0 0 3px rgba(0,111,207,.12);
+    }
+
+    .airplane-note {
+      font-size: 11px;
+      color: var(--gray-text);
+      line-height: 1.5;
+      margin-top: 2px;
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--yellow);
+      color: var(--blue);
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+      margin-top: 18px;
+    }
+
+    .submit-btn:hover {
+      background: #f0b400;
+      transform: translateY(-1px);
+    }
+
+    .table-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .table-tools input {
+      max-width: 260px;
+      padding: 10px 12px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 880px;
+    }
+
+    thead {
+      background: #f0f4f8;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #374151;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    td {
+      color: #333;
+    }
+
+    .route {
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .airplane-used {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .airplane-code {
+      display: block;
+      font-size: 11px;
+      color: var(--gray-text);
+      margin-top: 2px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status.active {
+      background: #e8f5e9;
+      color: var(--green);
+    }
+
+    .status.full {
+      background: #fff3cd;
+      color: #946200;
+    }
+
+    .status.cancelled,
+    .status.rejected {
+      background: #ffebee;
+      color: var(--red);
+    }
+
+    .status.pending {
+      background: #fff3cd;
+      color: #946200;
+    }
+
+    .status.approved,
+    .status.active {
+      background: #e8f5e9;
+      color: var(--green);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-buttons button,
+    .action-buttons a {
+      border: none;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: var(--font);
+    }
+
+    .edit-btn {
+      background: #eff6ff;
+      color: var(--light-blue);
+    }
+
+    .delete-btn,
+    .reject-btn {
+      background: #ffebee;
+      color: var(--red);
+    }
+
+    .approve-btn {
+      background: #e8f5e9;
+      color: var(--green);
+    }
+
+    .staff-section {
+      margin-top: 24px;
+    }
+
+    .staff-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .mini-card {
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .mini-card span {
+      display: block;
+      font-size: 11px;
+      color: var(--gray-text);
+      margin-bottom: 5px;
+    }
+
+    .mini-card strong {
+      font-size: 22px;
+      color: var(--blue);
+    }
+
+    .empty-table-row td {
+      text-align: center;
+      padding: 34px 20px;
+      color: var(--gray-text);
+      font-size: 13px;
+      background: #fafafa;
+    }
+
+    .empty-state {
+      padding: 34px 20px;
+      text-align: center;
+      color: var(--gray-text);
+      font-size: 13px;
+      background: #fafafa;
+      border-radius: 12px;
+      border: 1px dashed var(--gray-mid);
+      margin-top: 14px;
+    }
+
+    @media (max-width: 1150px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .staff-summary-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 650px) {
+      nav {
+        height: auto;
+        padding: 16px;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .nav-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .main-content {
+        padding: 22px 14px;
+      }
+
+      .header-row {
+        flex-direction: column;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .table-tools {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .table-tools input {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <a th:href="@{/}" class="logo">
+    <svg viewBox="0 0 220 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="38" font-family="Poppins,sans-serif" font-weight="700" font-size="36" fill="#FFC72C">expedia</text>
+    </svg>
+  </a>
+
+  <div class="nav-actions">
+    <a th:href="@{/flightProviderDashboard}">Dashboard</a>
+    <a th:href="@{/flightProviderAirplanes}">Airplanes</a>
+    <a th:href="@{/logout}" class="logout-btn">Logout</a>
+  </div>
+</nav>
+
+<div class="dashboard-layout">
+
+  <aside class="sidebar">
+    <div class="provider-card">
+      <h3 th:text="${providerName != null} ? ${providerName} : 'Flight Provider'">Flight Provider</h3>
+      <p>Manage approved airplanes, submit flight schedules, and wait for admin approval before flights appear to travelers.</p>
+    </div>
+
+    <div class="side-menu">
+      <a th:href="@{/flightProviderDashboard}" class="active">✈️ Flight Dashboard</a>
+      <a th:href="@{/flightProviderAirplanes}">🛫 Airplanes</a>
+      <a href="#staffApprovals">👥 Staff Approvals</a>
+      <a th:href="@{/flightProviderSchedules}">🗓️ Schedules</a>
+      <a th:href="@{/flightProviderBookings}">🎫 Bookings</a>
+      <a th:href="@{/flightProviderSettings}">⚙️ Settings</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="header-row">
+      <div>
+        <h1>Flight Provider Dashboard</h1>
+        <p>
+          Create flights by selecting an admin-approved airplane, route, date, and time. New flights are submitted as Pending and only appear on the user side after admin approval.
+        </p>
+      </div>
+    </div>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span>Total Flights</span>
+        <strong th:text="${totalFlights != null} ? ${totalFlights} : '0'">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Approved Active Flights</span>
+        <strong th:text="${activeFlights != null} ? ${activeFlights} : '0'">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Total Seat Capacity</span>
+        <strong th:text="${totalSeats != null} ? ${totalSeats} : '0'">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Today&apos;s Flights</span>
+        <strong th:text="${todaysFlights != null} ? ${todaysFlights} : '0'">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Pending Staff</span>
+        <strong th:text="${pendingStaffCount != null} ? ${pendingStaffCount} : '0'">0</strong>
+      </div>
+    </section>
+
+    <section class="content-grid">
+
+      <!-- CREATE FLIGHT FORM -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Create New Flight</h2>
+          <p>Select an approved airplane, then submit a flight schedule for admin review.</p>
+        </div>
+
+        <div class="panel-body">
+
+          <div th:if="${successMessage}" class="message success" th:text="${successMessage}">
+            Flight created successfully.
+          </div>
+
+          <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}">
+            Something went wrong.
+          </div>
+
+          <form th:action="@{/flightProviderDashboard/createFlight}" method="post">
+
+            <div class="form-grid">
+
+              <div class="field-group full">
+                <label for="airplaneId">Select Airplane</label>
+                <select id="airplaneId" name="airplaneId" required>
+                  <option value="" selected disabled>Select airplane</option>
+
+                  <option
+                    th:each="airplane : ${airplanes}"
+                    th:value="${airplane.id}"
+                    th:text="${airplane.airplaneName + ' - ' + airplane.airplaneModel + ' | Code: ' + airplane.airplaneCode + ' | Seats: ' + airplane.maximumSeatCapacity}">
+                    Airplane Name - Model | Seats
+                  </option>
+                </select>
+
+                <p class="airplane-note">
+                  Only admin-approved airplanes are shown here. The selected airplane&apos;s seat capacity will be used for this flight.
+                </p>
+              </div>
+
+              <div class="field-group full">
+                <label for="flightNumber">Flight Number</label>
+                <input
+                  type="text"
+                  id="flightNumber"
+                  name="flightNumber"
+                  placeholder="Example: 5J-562"
+                  required
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="origin">From</label>
+                <input
+                  type="text"
+                  id="origin"
+                  name="origin"
+                  placeholder="Example: Cebu"
+                  required
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="destination">To</label>
+                <input
+                  type="text"
+                  id="destination"
+                  name="destination"
+                  placeholder="Example: Manila"
+                  required
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="flightDate">Date of Flight</label>
+                <input
+                  type="date"
+                  id="flightDate"
+                  name="flightDate"
+                  required
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="flightTime">Time of Flight</label>
+                <input
+                  type="time"
+                  id="flightTime"
+                  name="flightTime"
+                  required
+                />
+              </div>
+
+              <div class="field-group full">
+                <label for="flightStatus">Status</label>
+                <select id="flightStatus" name="flightStatus" required>
+                  <option value="Active" selected>Active</option>
+                  <option value="Full">Full</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+
+            </div>
+
+            <button type="submit" class="submit-btn">
+              Submit Flight for Approval
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- FLIGHT LIST -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Created Flights</h2>
+          <p>View flights created by this provider and monitor admin approval status.</p>
+        </div>
+
+        <div class="panel-body">
+
+          <div class="table-tools">
+            <input
+              type="text"
+              id="flightSearch"
+              placeholder="Search flight, airplane, origin, destination..."
+              onkeyup="searchFlights()"
+            />
+          </div>
+
+          <div class="table-wrap">
+            <table id="flightsTable">
+              <thead>
+                <tr>
+                  <th>Flight No.</th>
+                  <th>Airplane</th>
+                  <th>Route</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Max Seats</th>
+                  <th>Flight Status</th>
+                  <th>Approval</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <!-- Database rows only -->
+                <tr th:each="flight : ${flights}" class="flight-row">
+                  <td th:text="${flight.flightNumber}"></td>
+
+                  <td>
+                    <span class="airplane-used" th:text="${flight.airplane != null ? flight.airplane.airplaneName : 'No airplane'}"></span>
+                    <span class="airplane-code" th:if="${flight.airplane != null}" th:text="${flight.airplane.airplaneCode}"></span>
+                  </td>
+
+                  <td>
+                    <span class="route">
+                      <span th:text="${flight.origin}"></span>
+                      →
+                      <span th:text="${flight.destination}"></span>
+                    </span>
+                  </td>
+
+                  <td th:text="${flight.flightDate}"></td>
+                  <td th:text="${flight.flightTime}"></td>
+                  <td th:text="${flight.maximumSeatCapacity}"></td>
+
+                  <td>
+                    <span
+                      class="status"
+                      th:classappend="${flight.flightStatus == 'Active'} ? ' active' : (${flight.flightStatus == 'Full'} ? ' full' : ' cancelled')"
+                      th:text="${flight.flightStatus}">
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="status" th:text="${flight.approvalStatus != null ? flight.approvalStatus : 'Pending'}">Pending</span>
+                  </td>
+
+                  <td>
+                    <div class="action-buttons">
+                      <a class="edit-btn" th:href="@{/flightProviderDashboard/editFlight/{id}(id=${flight.id})}">
+                        Edit
+                      </a>
+
+                      <a class="delete-btn" th:href="@{/flightProviderDashboard/deleteFlight/{id}(id=${flight.id})}">
+                        Delete
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr th:if="${flights == null or #lists.isEmpty(flights)}" class="empty-table-row">
+                  <td colspan="9">No flights created yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state" id="emptyState" style="display:none;">
+            No matching flights found.
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+
+    <section class="panel staff-section" id="staffApprovals">
+      <div class="panel-header with-action">
+        <div>
+          <h2>Staff Account Approvals</h2>
+          <p>Approve staff accounts registered under your flight provider company before they can access the staff dashboard.</p>
+        </div>
+        <a th:href="@{/staffRegistration}" class="header-action-btn">Create Staff Account</a>
+      </div>
+
+      <div class="panel-body">
+        <div class="staff-summary-grid">
+          <div class="mini-card">
+            <span>Pending Staff Accounts</span>
+            <strong th:text="${pendingStaffCount != null} ? ${pendingStaffCount} : '0'">0</strong>
+          </div>
+
+          <div class="mini-card">
+            <span>Approved Staff Accounts</span>
+            <strong th:text="${approvedStaffCount != null} ? ${approvedStaffCount} : '0'">0</strong>
+          </div>
+
+          <div class="mini-card">
+            <span>Rejected Staff Accounts</span>
+            <strong th:text="${rejectedStaffCount != null} ? ${rejectedStaffCount} : '0'">0</strong>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Staff Name</th>
+                <th>Email</th>
+                <th>Contact</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Approval Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr th:each="staffMember : ${staffAccounts}">
+                <td>
+                  <strong th:text="${staffMember.firstName + ' ' + staffMember.lastName}">Juan Dela Cruz</strong>
+                </td>
+                <td th:text="${staffMember.emailAddress}">staff@email.com</td>
+                <td th:text="${staffMember.contactNumber}">09XXXXXXXXX</td>
+                <td th:text="${staffMember.staffRole}">Booking Staff</td>
+                <td>
+                  <span
+                    class="status"
+                    th:classappend="${staffMember.staffStatus == 'Active'} ? ' active' : (${staffMember.staffStatus == 'Pending'} ? ' pending' : ' rejected')"
+                    th:text="${staffMember.staffStatus != null ? staffMember.staffStatus : 'Pending'}">
+                    Pending
+                  </span>
+                </td>
+                <td>
+                  <div class="action-buttons" th:if="${staffMember.staffStatus == null or staffMember.staffStatus == 'Pending'}">
+                    <form th:action="@{/flightProviderDashboard/approveStaff/{staffId}(staffId=${staffMember.id})}" method="post">
+                      <button type="submit" class="approve-btn">Approve</button>
+                    </form>
+
+                    <form th:action="@{/flightProviderDashboard/rejectStaff/{staffId}(staffId=${staffMember.id})}" method="post">
+                      <button type="submit" class="reject-btn">Reject</button>
+                    </form>
+                  </div>
+
+                  <span th:unless="${staffMember.staffStatus == null or staffMember.staffStatus == 'Pending'}" class="airplane-note">
+                    Already reviewed
+                  </span>
+                </td>
+              </tr>
+
+              <tr th:if="${staffAccounts == null or #lists.isEmpty(staffAccounts)}" class="empty-table-row">
+                <td colspan="6">No staff accounts have registered under this provider yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const messages = document.querySelectorAll(".message");
+
+    messages.forEach(function (message) {
+      setTimeout(function () {
+        message.classList.add("hide");
+
+        setTimeout(function () {
+          message.remove();
+        }, 400);
+
+      }, 2000);
+    });
+  });
+
+  function searchFlights() {
+    const input = document.getElementById("flightSearch");
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelectorAll("#flightsTable tbody tr.flight-row");
+    const emptyState = document.getElementById("emptyState");
+
+    let visibleCount = 0;
+
+    rows.forEach(function (row) {
+      const text = row.textContent.toLowerCase();
+
+      if (text.includes(filter)) {
+        row.style.display = "";
+        visibleCount++;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    if (rows.length === 0) {
+      emptyState.style.display = "none";
+      return;
+    }
+
+    emptyState.style.display = visibleCount === 0 ? "block" : "none";
+  }
+</script>
+
+</body>
+</html>

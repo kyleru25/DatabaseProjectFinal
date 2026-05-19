@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expedia - Deals on Hotels, Flights, Vacations & More</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+
+    :root {
+      --expedia-blue: #00356b;
+      --expedia-yellow: #ffc72c;
+      --expedia-light-blue: #006fcf;
+      --expedia-dark: #1a1a2e;
+      --white: #ffffff;
+      --gray-light: #f5f5f5;
+      --gray-mid: #e0e0e0;
+      --gray-text: #6b7280;
+      --font: 'Poppins', sans-serif;
+    }
+
+    body { 
+      font-family: var(--font); 
+      background: var(--white); 
+      color: #222; 
+    }
+
+    /* NAV */
+    nav {
+      background: var(--expedia-blue);
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between;
+      padding: 0 32px; 
+      height: 60px; 
+      position: sticky; 
+      top: 0; 
+      z-index: 100;
+    }
+
+    .nav-logo { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+      text-decoration: none; 
+    }
+
+    .nav-logo svg { 
+      width: 120px; 
+    }
+
+    .nav-links { 
+      display: flex; 
+      gap: 4px; 
+    }
+
+    .nav-links a {
+      color: var(--white); 
+      text-decoration: none; 
+      font-size: 13px;
+      padding: 6px 12px; 
+      border-radius: 4px; 
+      transition: background .2s;
+    }
+
+    .nav-links a:hover { 
+      background: rgba(255,255,255,.15); 
+    }
+
+    .nav-actions { 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+    }
+
+    .nav-actions a {
+      color: var(--white); 
+      font-size: 13px; 
+      text-decoration: none;
+      padding: 6px 14px; 
+      border-radius: 20px; 
+      transition: background .2s;
+      white-space: nowrap;
+    }
+
+    .nav-actions a:hover { 
+      background: rgba(255,255,255,.15); 
+    }
+
+    .nav-actions .btn-signin {
+      border: 1.5px solid var(--white); 
+      font-weight: 600;
+    }
+
+    .nav-actions .btn-register {
+      background: var(--expedia-yellow);
+      color: var(--expedia-blue);
+      font-weight: 700;
+    }
+
+    .nav-actions .btn-register:hover {
+      background: #f0b400;
+      color: var(--expedia-blue);
+    }
+
+    .nav-actions .btn-provider {
+      background: #ffffff;
+      color: var(--expedia-blue);
+      font-weight: 700;
+      border: 1.5px solid #ffffff;
+    }
+
+    .nav-actions .btn-provider:hover {
+      background: var(--expedia-yellow);
+      color: var(--expedia-blue);
+      border-color: var(--expedia-yellow);
+    }
+
+    .nav-actions .btn-staff {
+      border: 1.5px solid rgba(255,255,255,.85);
+      font-weight: 600;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #003580 0%, #0055a5 50%, #006fcf 100%);
+      padding: 64px 32px 80px;
+      text-align: center;
+      position: relative; 
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute; 
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=1600&q=80') center/cover no-repeat;
+      opacity: .18;
+    }
+
+    .hero-content { 
+      position: relative; 
+    }
+
+    .hero h1 {
+      color: var(--white); 
+      font-size: 42px; 
+      font-weight: 700;
+      text-shadow: 0 2px 12px rgba(0,0,0,.3); 
+      margin-bottom: 8px;
+    }
+
+    .hero h1 span { 
+      color: var(--expedia-yellow); 
+    }
+
+    .hero p { 
+      color: rgba(255,255,255,.85); 
+      font-size: 16px; 
+      margin-bottom: 32px; 
+    }
+
+    /* SEARCH TABS */
+    .search-box {
+      background: var(--white); 
+      border-radius: 12px;
+      max-width: 960px; 
+      margin: 0 auto;
+      box-shadow: 0 8px 40px rgba(0,0,0,.25);
+      overflow: hidden;
+    }
+
+    .search-tabs {
+      display: flex; 
+      background: #f0f4f8;
+      border-bottom: 1px solid var(--gray-mid);
+    }
+
+    .tab-btn {
+      display: flex; 
+      align-items: center; 
+      gap: 7px;
+      padding: 14px 22px; 
+      font-size: 14px; 
+      font-weight: 500;
+      background: none; 
+      border: none; 
+      cursor: pointer;
+      color: #555; 
+      border-bottom: 3px solid transparent;
+      transition: all .2s; 
+      font-family: var(--font);
+    }
+
+    .tab-btn.active {
+      background: var(--white); 
+      color: var(--expedia-blue);
+      border-bottom-color: var(--expedia-yellow); 
+      font-weight: 600;
+    }
+
+    .tab-btn:hover:not(.active) { 
+      background: rgba(0,0,0,.04); 
+    }
+
+    .tab-icon { 
+      font-size: 18px; 
+    }
+
+    /* SEARCH FIELDS */
+    .search-form { 
+      padding: 24px; 
+    }
+
+    .search-row { 
+      display: flex; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+    }
+
+    .field-group {
+      flex: 1; 
+      min-width: 160px;
+      display: flex; 
+      flex-direction: column; 
+      gap: 4px;
+    }
+
+    .field-group label {
+      font-size: 11px; 
+      font-weight: 600; 
+      color: #555;
+      text-transform: uppercase; 
+      letter-spacing: .5px;
+    }
+
+    .field-group input, 
+    .field-group select {
+      border: 1.5px solid var(--gray-mid); 
+      border-radius: 8px;
+      padding: 10px 14px; 
+      font-size: 14px; 
+      font-family: var(--font);
+      outline: none; 
+      transition: border-color .2s; 
+      color: #222;
+      background: var(--white);
+    }
+
+    .field-group input:focus, 
+    .field-group select:focus {
+      border-color: var(--expedia-light-blue);
+      box-shadow: 0 0 0 3px rgba(0,111,207,.1);
+    }
+
+    .field-divider {
+      align-self: flex-end; 
+      padding-bottom: 11px;
+      color: #aaa; 
+      font-size: 18px;
+    }
+
+    .search-btn {
+      align-self: flex-end;
+      background: var(--expedia-yellow); 
+      color: var(--expedia-blue);
+      border: none; 
+      border-radius: 8px;
+      padding: 11px 32px; 
+      font-size: 15px; 
+      font-weight: 700;
+      cursor: pointer; 
+      font-family: var(--font);
+      transition: background .2s, transform .1s;
+      white-space: nowrap;
+    }
+
+    .search-btn:hover { 
+      background: #f0b400; 
+      transform: translateY(-1px); 
+    }
+
+    /* DEALS STRIP */
+    .deals-strip {
+      background: var(--expedia-yellow); 
+      padding: 14px 32px;
+      display: flex; 
+      align-items: center; 
+      gap: 16px;
+    }
+
+    .deals-strip span:first-child {
+      background: var(--expedia-blue); 
+      color: var(--white);
+      font-size: 12px; 
+      font-weight: 700; 
+      padding: 4px 10px; 
+      border-radius: 4px;
+    }
+
+    .deals-strip p { 
+      font-size: 14px; 
+      font-weight: 500; 
+      color: var(--expedia-blue); 
+    }
+
+    .deals-strip a { 
+      color: var(--expedia-blue); 
+      font-weight: 700; 
+      text-decoration: underline; 
+    }
+
+    /* PROVIDER SECTION */
+    .provider-section {
+      padding: 42px 32px;
+      background: #f5f7fb;
+    }
+
+    .provider-card {
+      max-width: 1180px;
+      margin: 0 auto;
+      background: var(--white);
+      border: 1.5px solid var(--gray-mid);
+      border-radius: 18px;
+      padding: 34px 38px;
+      display: grid;
+      grid-template-columns: 1.4fr .9fr;
+      gap: 28px;
+      align-items: center;
+      box-shadow: 0 8px 28px rgba(0,0,0,.08);
+    }
+
+    .provider-card h2 {
+      font-size: 28px;
+      color: var(--expedia-blue);
+      margin-bottom: 10px;
+    }
+
+    .provider-card p {
+      font-size: 14px;
+      color: var(--gray-text);
+      line-height: 1.7;
+      margin-bottom: 18px;
+    }
+
+    .provider-features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .provider-feature {
+      background: #f0f4f8;
+      border-radius: 12px;
+      padding: 14px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .provider-feature strong {
+      display: block;
+      color: var(--expedia-blue);
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .provider-feature span {
+      color: var(--gray-text);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .provider-actions {
+      background: linear-gradient(135deg, #003580, #006fcf);
+      border-radius: 16px;
+      padding: 28px;
+      color: var(--white);
+      text-align: center;
+    }
+
+    .provider-actions h3 {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+
+    .provider-actions p {
+      color: rgba(255,255,255,.82);
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .provider-create-btn {
+      display: inline-block;
+      background: var(--expedia-yellow);
+      color: var(--expedia-blue);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 22px;
+      border-radius: 10px;
+      transition: background .2s, transform .2s;
+    }
+
+    .provider-create-btn:hover {
+      background: #f0b400;
+      transform: translateY(-2px);
+    }
+
+    .provider-login-link {
+      display: block;
+      margin-top: 14px;
+      color: rgba(255,255,255,.9);
+      font-size: 12px;
+      text-decoration: underline;
+    }
+
+    /* SECTION */
+    .section { 
+      padding: 48px 32px; 
+    }
+
+    .section-title {
+      font-size: 26px; 
+      font-weight: 700; 
+      color: #111; 
+      margin-bottom: 6px;
+    }
+
+    .section-subtitle { 
+      font-size: 14px; 
+      color: var(--gray-text); 
+      margin-bottom: 28px; 
+    }
+
+    /* CARDS GRID */
+    .cards-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(220px,1fr)); 
+      gap: 20px; 
+    }
+
+    .dest-card {
+      border-radius: 12px; 
+      overflow: hidden; 
+      cursor: pointer;
+      box-shadow: 0 2px 12px rgba(0,0,0,.1);
+      transition: transform .25s, box-shadow .25s;
+      position: relative;
+    }
+
+    .dest-card:hover { 
+      transform: translateY(-5px); 
+      box-shadow: 0 12px 32px rgba(0,0,0,.18); 
+    }
+
+    .dest-card img { 
+      width: 100%; 
+      height: 170px; 
+      object-fit: cover; 
+      display: block; 
+    }
+
+    .dest-card-body { 
+      padding: 14px 16px; 
+      background: var(--white); 
+    }
+
+    .dest-card-body h3 { 
+      font-size: 15px; 
+      font-weight: 600; 
+      margin-bottom: 4px; 
+    }
+
+    .dest-card-body p { 
+      font-size: 12px; 
+      color: var(--gray-text); 
+    }
+
+    .dest-card-body .price {
+      margin-top: 8px; 
+      font-size: 13px; 
+      color: var(--expedia-blue); 
+      font-weight: 700;
+    }
+
+    .dest-card-badge {
+      position: absolute; 
+      top: 12px; 
+      left: 12px;
+      background: var(--expedia-yellow); 
+      color: var(--expedia-blue);
+      font-size: 11px; 
+      font-weight: 700; 
+      padding: 3px 9px; 
+      border-radius: 20px;
+    }
+
+    /* DEAL CARDS */
+    .deals-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); 
+      gap: 20px; 
+    }
+
+    .deal-card {
+      display: flex; 
+      border: 1.5px solid var(--gray-mid); 
+      border-radius: 12px;
+      overflow: hidden; 
+      transition: box-shadow .2s;
+    }
+
+    .deal-card:hover { 
+      box-shadow: 0 6px 24px rgba(0,0,0,.12); 
+    }
+
+    .deal-card img { 
+      width: 120px; 
+      min-height: 120px; 
+      object-fit: cover; 
+    }
+
+    .deal-card-body { 
+      padding: 14px 16px; 
+      flex: 1; 
+    }
+
+    .deal-card-body h3 { 
+      font-size: 14px; 
+      font-weight: 600; 
+      margin-bottom: 4px; 
+    }
+
+    .deal-card-body .stars { 
+      color: var(--expedia-yellow); 
+      font-size: 13px; 
+    }
+
+    .deal-card-body .meta { 
+      font-size: 12px; 
+      color: var(--gray-text); 
+      margin-top: 4px; 
+    }
+
+    .deal-card-body .deal-price { 
+      margin-top: 8px; 
+    }
+
+    .deal-card-body .deal-price .old { 
+      font-size: 12px; 
+      color: #aaa; 
+      text-decoration: line-through; 
+    }
+
+    .deal-card-body .deal-price .new { 
+      font-size: 18px; 
+      font-weight: 700; 
+      color: #c00; 
+    }
+
+    /* PROMO BANNER */
+    .promo-banner {
+      background: linear-gradient(90deg, #003580, #006fcf);
+      border-radius: 16px; 
+      padding: 40px 48px;
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between;
+      gap: 32px; 
+      margin: 0 32px 48px;
+    }
+
+    .promo-banner h2 { 
+      color: var(--white); 
+      font-size: 28px; 
+      font-weight: 700; 
+      margin-bottom: 8px; 
+    }
+
+    .promo-banner p { 
+      color: rgba(255,255,255,.8); 
+      font-size: 14px; 
+    }
+
+    .promo-banner .promo-btn {
+      background: var(--expedia-yellow); 
+      color: var(--expedia-blue);
+      border: none; 
+      padding: 13px 28px; 
+      border-radius: 8px;
+      font-size: 15px; 
+      font-weight: 700; 
+      cursor: pointer;
+      white-space: nowrap; 
+      font-family: var(--font);
+      transition: background .2s;
+    }
+
+    .promo-banner .promo-btn:hover { 
+      background: #f0b400; 
+    }
+
+    /* FOOTER */
+    footer {
+      background: #1a1a2e; 
+      color: #ccc;
+      padding: 48px 32px 24px;
+    }
+
+    .footer-grid {
+      display: grid; 
+      grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+      gap: 32px; 
+      margin-bottom: 40px;
+    }
+
+    .footer-col h4 { 
+      color: var(--white); 
+      font-size: 13px; 
+      font-weight: 600; 
+      margin-bottom: 14px; 
+    }
+
+    .footer-col a {
+      display: block; 
+      color: #aaa; 
+      text-decoration: none; 
+      font-size: 12px;
+      margin-bottom: 8px; 
+      transition: color .2s;
+    }
+
+    .footer-col a:hover { 
+      color: var(--white); 
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.1); 
+      padding-top: 24px;
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      flex-wrap: wrap; 
+      gap: 16px;
+    }
+
+    .footer-bottom p { 
+      font-size: 12px; 
+      color: #888; 
+    }
+
+    .footer-logos { 
+      display: flex; 
+      gap: 12px; 
+    }
+
+    .footer-logos img { 
+      height: 28px; 
+      filter: grayscale(1) brightness(1.6); 
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1100px) {
+      nav {
+        height: auto;
+        padding: 14px 24px;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .nav-actions {
+        flex-wrap: wrap;
+      }
+
+      .provider-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 900px) {
+      nav {
+        height: auto;
+        padding: 16px;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .nav-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .hero h1 {
+        font-size: 32px;
+      }
+
+      .search-tabs {
+        flex-wrap: wrap;
+      }
+
+      .tab-btn {
+        flex: 1;
+        justify-content: center;
+        min-width: 140px;
+      }
+
+      .provider-card {
+        padding: 28px 22px;
+      }
+
+      .provider-features {
+        grid-template-columns: 1fr;
+      }
+
+      .promo-banner {
+        flex-direction: column;
+        align-items: flex-start;
+        margin: 0 16px 40px;
+        padding: 32px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- NAVIGATION -->
+<nav>
+  <a th:href="@{/}" class="nav-logo">
+    <svg viewBox="0 0 220 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="38" font-family="Poppins,sans-serif" font-weight="700" font-size="36" fill="#FFC72C">expedia</text>
+    </svg>
+  </a>
+
+  <div class="nav-links">
+    <a th:href="@{/stays}">Stays</a>
+    <a th:href="@{/flights}">Flights</a>
+    <a th:href="@{/cars}">Cars</a>
+    <a th:href="@{/packages}">Packages</a>
+    <a th:href="@{/things-to-do}">Things to Do</a>
+    <a th:href="@{/cruises}">Cruises</a>
+  </div>
+
+  <div class="nav-actions">
+    <a th:href="@{/support}">Support</a>
+    <a th:href="@{/trips}">Trips</a>
+    <a th:href="@{/staffRegistration}" class="btn-staff">Staff Registration</a>
+    <a th:href="@{/flightProviderRegistration}" class="btn-provider">Create Flight Provider Account</a>
+    <a th:href="@{/login}" class="btn-signin">Sign In</a>
+    <a th:href="@{/register}" class="btn-register">Register</a>
+  </div>
+</nav>
+
+<!-- HERO + SEARCH -->
+<section class="hero">
+  <div class="hero-content">
+    <h1>Travel the world for <span>less</span></h1>
+    <p>Millions of properties. Flexible booking. One loyalty programme.</p>
+
+    <div class="search-box">
+      <div class="search-tabs">
+        <button class="tab-btn active" onclick="setTab(this,'hotel')">
+          <span class="tab-icon">🏨</span> Stays
+        </button>
+        <button class="tab-btn" onclick="setTab(this,'flight')">
+          <span class="tab-icon">✈️</span> Flights
+        </button>
+        <button class="tab-btn" onclick="setTab(this,'package')">
+          <span class="tab-icon">📦</span> Packages
+        </button>
+        <button class="tab-btn" onclick="setTab(this,'car')">
+          <span class="tab-icon">🚗</span> Cars
+        </button>
+        <button class="tab-btn" onclick="setTab(this,'activity')">
+          <span class="tab-icon">🎭</span> Things to Do
+        </button>
+      </div>
+
+      <!-- Hotel Search -->
+      <div class="search-form" id="tab-hotel">
+        <form th:action="@{/search}" method="get">
+          <div class="search-row">
+            <div class="field-group" style="flex:2;">
+              <label>Going to</label>
+              <input type="text" name="destination" placeholder="City, hotel, or airport" th:value="${param.destination}"/>
+            </div>
+
+            <div class="field-group">
+              <label>Check-in</label>
+              <input type="date" name="checkin" th:value="${param.checkin}"/>
+            </div>
+
+            <div class="field-group">
+              <label>Check-out</label>
+              <input type="date" name="checkout" th:value="${param.checkout}"/>
+            </div>
+
+            <div class="field-group">
+              <label>Travelers</label>
+              <select name="travelers">
+                <option>1 room, 2 adults</option>
+                <option>1 room, 1 adult</option>
+                <option>2 rooms, 2 adults</option>
+                <option>2 rooms, 4 adults</option>
+              </select>
+            </div>
+
+            <div style="align-self:flex-end;">
+              <button type="submit" class="search-btn">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Flight Search -->
+      <div class="search-form" id="tab-flight" style="display:none;">
+        <form th:action="@{/flights/search}" method="get">
+          <div class="search-row">
+            <div class="field-group">
+              <label>From</label>
+              <input type="text" name="origin" placeholder="City or airport" th:value="${origin}"/>
+            </div>
+
+            <div class="field-divider">⇄</div>
+
+            <div class="field-group">
+              <label>To</label>
+              <input type="text" name="dest" placeholder="City or airport" th:value="${destination}"/>
+            </div>
+
+            <div class="field-group">
+              <label>Depart</label>
+              <input type="date" name="depart" th:value="${depart}"/>
+            </div>
+
+            <div class="field-group">
+              <label>Return</label>
+              <input type="date" name="return"/>
+            </div>
+
+            <div class="field-group">
+              <label>Passengers</label>
+              <select name="pax">
+                <option>1 Adult</option>
+                <option>2 Adults</option>
+                <option>2 Adults, 1 Child</option>
+              </select>
+            </div>
+
+            <div style="align-self:flex-end;">
+              <button type="submit" class="search-btn">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Package Search -->
+      <div class="search-form" id="tab-package" style="display:none;">
+        <form th:action="@{/packages/search}" method="get">
+          <div class="search-row">
+            <div class="field-group">
+              <label>Leaving from</label>
+              <input type="text" name="origin" placeholder="City or airport" th:value="${origin}"/>
+            </div>
+
+            <div class="field-group" style="flex:2;">
+              <label>Going to</label>
+              <input type="text" name="destination" placeholder="City or hotel"/>
+            </div>
+
+            <div class="field-group">
+              <label>Depart</label>
+              <input type="date" name="depart" th:value="${depart}"/>
+            </div>
+
+            <div class="field-group">
+              <label>Return</label>
+              <input type="date" name="return"/>
+            </div>
+
+            <div style="align-self:flex-end;">
+              <button type="submit" class="search-btn">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Car Search -->
+      <div class="search-form" id="tab-car" style="display:none;">
+        <form th:action="@{/cars/search}" method="get">
+          <div class="search-row">
+            <div class="field-group" style="flex:2;">
+              <label>Pick-up location</label>
+              <input type="text" name="pickup" placeholder="Airport, city, or hotel"/>
+            </div>
+
+            <div class="field-group">
+              <label>Pick-up date</label>
+              <input type="date" name="pickupDate"/>
+            </div>
+
+            <div class="field-group">
+              <label>Drop-off date</label>
+              <input type="date" name="dropoffDate"/>
+            </div>
+
+            <div style="align-self:flex-end;">
+              <button type="submit" class="search-btn">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Activity Search -->
+      <div class="search-form" id="tab-activity" style="display:none;">
+        <form th:action="@{/activities/search}" method="get">
+          <div class="search-row">
+            <div class="field-group" style="flex:2;">
+              <label>Where to?</label>
+              <input type="text" name="location" placeholder="City or attraction"/>
+            </div>
+
+            <div class="field-group">
+              <label>Date</label>
+              <input type="date" name="date"/>
+            </div>
+
+            <div style="align-self:flex-end;">
+              <button type="submit" class="search-btn">Search</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DEALS STRIP -->
+<div class="deals-strip">
+  <span>HOT DEALS</span>
+  <p>
+    Save up to 40% on select hotels — members only!
+    <a th:href="@{/login}">Sign in to unlock →</a>
+  </p>
+</div>
+
+<!-- FLIGHT SERVICE PROVIDER SECTION -->
+<section class="provider-section">
+  <div class="provider-card">
+    <div>
+      <h2>Are you a flight service provider?</h2>
+      <p>
+        Create a service provider account to manage flight-related records in the system.
+        Providers can add airplanes, create flight schedules, update flight details,
+        and prepare available flights for customer searching and booking.
+      </p>
+
+      <div class="provider-features">
+        <div class="provider-feature">
+          <strong>Airplane Management</strong>
+          <span>Add aircraft details such as model, capacity, and airline information.</span>
+        </div>
+
+        <div class="provider-feature">
+          <strong>Flight Scheduling</strong>
+          <span>Create flight routes, departure dates, arrival times, and available seats.</span>
+        </div>
+
+        <div class="provider-feature">
+          <strong>Provider Dashboard</strong>
+          <span>Access a dedicated dashboard for managing flights and schedules.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="provider-actions">
+      <h3>Start managing flights</h3>
+      <p>
+        Register as a flight provider and proceed to your provider dashboard.
+      </p>
+
+      <a th:href="@{/flightProviderRegistration}" class="provider-create-btn">
+        Create Service Provider Account →
+      </a>
+
+      <a th:href="@{/login}" class="provider-login-link">
+        Already approved? Sign in here
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- STAFF REGISTRATION SECTION -->
+<section class="provider-section" style="padding-top:0;">
+  <div class="provider-card" style="border-top:4px solid var(--expedia-yellow);">
+    <div>
+      <h2>Are you airline or booking staff?</h2>
+      <p>
+        Staff members can create an account under an approved flight provider. The selected provider must approve the staff account before the staff member can sign in and access the staff dashboard.
+      </p>
+
+      <div class="provider-features">
+        <div class="provider-feature">
+          <strong>Provider Selection</strong>
+          <span>Choose the approved flight provider company you belong to.</span>
+        </div>
+        <div class="provider-feature">
+          <strong>Approval Required</strong>
+          <span>Your account remains pending until that provider reviews it.</span>
+        </div>
+        <div class="provider-feature">
+          <strong>Staff Dashboard</strong>
+          <span>Once approved, use the single login page to access staff tools.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="provider-actions">
+      <h3>Register staff account</h3>
+      <p>Submit your staff details for flight provider approval.</p>
+      <a th:href="@{/staffRegistration}" class="provider-create-btn">
+        Create Staff Account →
+      </a>
+      <a th:href="@{/login}" class="provider-login-link">
+        Already approved? Sign in here
+      </a>
+    </div>
+  </div>
+</section>
+
+
+<!-- DESTINATIONS -->
+<section class="section">
+  <h2 class="section-title">Popular destinations</h2>
+  <p class="section-subtitle">Trending places travellers are searching right now</p>
+
+  <div class="cards-grid">
+    <div th:each="dest : ${popularDestinations}" class="dest-card">
+      <span class="dest-card-badge" th:if="${dest.badge}" th:text="${dest.badge}">Deal</span>
+      <img th:src="${dest.imageUrl}" th:alt="${dest.name}"/>
+      <div class="dest-card-body">
+        <h3 th:text="${dest.name}">Destination</h3>
+        <p th:text="${dest.description}">Description</p>
+        <p class="price" th:text="'From $' + ${dest.priceFrom} + '/night'">From $xx/night</p>
+      </div>
+    </div>
+
+    <div class="dest-card">
+      <span class="dest-card-badge">🔥 Hot</span>
+      <img src="https://images.unsplash.com/photo-1543716091-a840c05249ec?w=400&q=80" alt="Tokyo"/>
+      <div class="dest-card-body">
+        <h3>Tokyo, Japan</h3>
+        <p>Explore temples, neon streets & ramen</p>
+        <p class="price">From $89/night</p>
+      </div>
+    </div>
+
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=400&q=80" alt="Paris"/>
+      <div class="dest-card-body">
+        <h3>Paris, France</h3>
+        <p>The city of lights & love</p>
+        <p class="price">From $112/night</p>
+      </div>
+    </div>
+
+    <div class="dest-card">
+      <span class="dest-card-badge">Sale</span>
+      <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=400&q=80" alt="New York"/>
+      <div class="dest-card-body">
+        <h3>New York, USA</h3>
+        <p>The city that never sleeps</p>
+        <p class="price">From $145/night</p>
+      </div>
+    </div>
+
+    <div class="dest-card">
+      <img src="https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&q=80" alt="Dubai"/>
+      <div class="dest-card-body">
+        <h3>Dubai, UAE</h3>
+        <p>Desert luxury & futuristic skylines</p>
+        <p class="price">From $98/night</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOTEL DEALS -->
+<section class="section" style="padding-top:0;">
+  <h2 class="section-title">Today's hotel deals</h2>
+  <p class="section-subtitle">Hand-picked properties with limited-time pricing</p>
+
+  <div class="deals-grid">
+    <div th:each="hotel : ${hotelDeals}" class="deal-card">
+      <img th:src="${hotel.imageUrl}" th:alt="${hotel.name}"/>
+      <div class="deal-card-body">
+        <h3 th:text="${hotel.name}">Hotel Name</h3>
+        <div class="stars" th:text="${hotel.stars}">★★★★☆</div>
+        <p class="meta" th:text="${hotel.location}">Location</p>
+        <div class="deal-price">
+          <span class="old" th:text="'$' + ${hotel.originalPrice}">$200</span>
+          <span class="new" th:text="'$' + ${hotel.salePrice}">$149</span>
+          <span style="font-size:12px;color:#666;"> / night</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="deal-card">
+      <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=300&q=80" alt="Hotel"/>
+      <div class="deal-card-body">
+        <h3>The Grand Palace Hotel</h3>
+        <div class="stars">★★★★★</div>
+        <p class="meta">Paris, France · 5 star</p>
+        <div class="deal-price">
+          <span class="old">$340</span>
+          <span class="new">$198</span>
+          <span style="font-size:12px;color:#666;"> / night</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="deal-card">
+      <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=300&q=80" alt="Hotel"/>
+      <div class="deal-card-body">
+        <h3>Oceanview Bali Resort</h3>
+        <div class="stars">★★★★☆</div>
+        <p class="meta">Bali, Indonesia · 4 star</p>
+        <div class="deal-price">
+          <span class="old">$185</span>
+          <span class="new">$89</span>
+          <span style="font-size:12px;color:#666;"> / night</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="deal-card">
+      <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=300&q=80" alt="Hotel"/>
+      <div class="deal-card-body">
+        <h3>Manhattan Skyline Inn</h3>
+        <div class="stars">★★★★☆</div>
+        <p class="meta">New York, USA · 4 star</p>
+        <div class="deal-price">
+          <span class="old">$280</span>
+          <span class="new">$175</span>
+          <span style="font-size:12px;color:#666;"> / night</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROMO BANNER -->
+<div class="promo-banner">
+  <div>
+    <h2>Join One Key™ and save more</h2>
+    <p>Earn OneKeyCash on hotels, flights and cars — and spend it all in one place.</p>
+  </div>
+
+  <a th:href="@{/register}">
+    <button class="promo-btn">Join for free →</button>
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-col">
+      <h4>Explore</h4>
+      <a th:href="@{/stays}">Hotels</a>
+      <a th:href="@{/flights}">Flights</a>
+      <a th:href="@{/cars}">Car Rentals</a>
+      <a th:href="@{/packages}">Vacation Packages</a>
+      <a th:href="@{/cruises}">Cruises</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Flight Providers</h4>
+      <a th:href="@{/flightProviderRegistration}">Create Provider Account</a>
+      <a th:href="@{/login}">Provider Login</a>
+      <a th:href="@{/staffRegistration}">Staff Registration</a>
+      <a th:href="@{/flightProviderAirplanes}">Manage Airplanes</a>
+      <a th:href="@{/flightProviderDashboard}">Manage Flight Schedules</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Expedia</h4>
+      <a th:href="@{/about}">About Expedia</a>
+      <a th:href="@{/careers}">Careers</a>
+      <a th:href="@{/press}">Press Room</a>
+      <a th:href="@{/advertise}">Advertise</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Support</h4>
+      <a th:href="@{/help}">Help Center</a>
+      <a th:href="@{/cancel}">Cancel your trip</a>
+      <a th:href="@{/refunds}">Refunds</a>
+      <a th:href="@{/accessibility}">Accessibility</a>
+    </div>
+
+    <div class="footer-col">
+      <h4>Policies</h4>
+      <a th:href="@{/privacy}">Privacy Policy</a>
+      <a th:href="@{/terms}">Terms of Service</a>
+      <a th:href="@{/cookies}">Cookie Policy</a>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p>© 2025 Expedia, Inc., an Expedia Group company. All rights reserved.</p>
+    <div style="font-size:12px;color:#666;">🌏 Philippines · PHP · English</div>
+  </div>
+</footer>
+
+<script th:inline="javascript">
+  function setTab(btn, tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    ['hotel', 'flight', 'package', 'car', 'activity'].forEach(id => {
+      const el = document.getElementById('tab-' + id);
+      if (el) {
+        el.style.display = id === tabId ? 'block' : 'none';
+      }
+    });
+  }
+
+  /*<![CDATA[*/
+  const activeTab = /*[[${activeTab}]]*/ 'hotel';
+
+  if (activeTab && activeTab !== 'hotel') {
+    const btn = document.querySelector('.tab-btn[onclick*="' + activeTab + '"]');
+    if (btn) {
+      setTab(btn, activeTab);
+    }
+  }
+  /*]]>*/
+</script>
+
+
+<section class="section" th:if="${availableFlights != null}">
+  <h2 class="section-title">Available Flights</h2>
+  <p class="section-subtitle">Flights added by approved flight providers</p>
+
+  <div style="display:grid; gap:16px; margin-top:24px;">
+
+    <div th:if="${errorMessage}" 
+         style="background:#ffe5e5; color:#b00020; padding:14px; border-radius:10px; font-weight:500;"
+         th:text="${errorMessage}">
+    </div>
+
+    <div th:if="${#lists.isEmpty(availableFlights)}"
+         style="background:#f5f5f5; padding:18px; border-radius:10px; text-align:center; color:#555;">
+      No flights found.
+    </div>
+
+    <div th:each="flight : ${availableFlights}"
+         style="background:white; border-radius:14px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,.08); border:1px solid #e5e7eb;">
+
+      <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+
+        <div>
+          <h3 style="color:#00356b; margin-bottom:6px;" th:text="${flight.flightNumber}">Flight Number</h3>
+          <p style="margin:4px 0;">
+            <strong th:text="${flight.origin}">Origin</strong>
+            →
+            <strong th:text="${flight.destination}">Destination</strong>
+          </p>
+          <p style="color:#6b7280; margin:4px 0;"
+             th:text="${flight.flightProvider.companyName}">
+            Airline
+          </p>
+        </div>
+
+        <div style="text-align:right;">
+          <p style="font-weight:600;" th:text="${flight.flightDate}">Date</p>
+          <p style="color:#6b7280;" th:text="${flight.flightTime}">Time</p>
+          <p style="color:#006fcf; font-weight:600;">
+            Seats:
+            <span th:text="${flight.maximumSeatCapacity}">0</span>
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+</body>
+</html>

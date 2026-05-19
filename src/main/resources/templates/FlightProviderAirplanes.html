@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Manage Airplanes | Expedia</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --blue: #003580;
+      --yellow: #ffc72c;
+      --light-blue: #006fcf;
+      --white: #ffffff;
+      --gray-bg: #f5f7fa;
+      --gray-mid: #d1d5db;
+      --gray-text: #6b7280;
+      --text: #222222;
+      --green: #2e7d32;
+      --red: #c62828;
+      --orange: #946200;
+      --font: 'Poppins', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--gray-bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    nav {
+      height: 64px;
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      text-decoration: none;
+    }
+
+    .logo svg {
+      width: 120px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-actions a {
+      color: rgba(255,255,255,.85);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      transition: background .2s;
+    }
+
+    .nav-actions a:hover {
+      background: rgba(255,255,255,.15);
+      color: var(--white);
+    }
+
+    .logout-btn {
+      border: 1.5px solid rgba(255,255,255,.85);
+      font-weight: 600;
+    }
+
+    .dashboard-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+
+    .sidebar {
+      background: var(--white);
+      border-right: 1px solid var(--gray-mid);
+      padding: 26px 20px;
+    }
+
+    .provider-card {
+      background: linear-gradient(135deg, #003580, #006fcf);
+      color: var(--white);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .provider-card h3 {
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .provider-card p {
+      font-size: 12px;
+      color: rgba(255,255,255,.8);
+      line-height: 1.5;
+    }
+
+    .side-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .side-menu a {
+      text-decoration: none;
+      color: #333;
+      font-size: 13px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      transition: background .2s, color .2s;
+    }
+
+    .side-menu a:hover,
+    .side-menu a.active {
+      background: #eff6ff;
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    .main-content {
+      padding: 32px;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .header-row h1 {
+      font-size: 30px;
+      color: var(--blue);
+      margin-bottom: 6px;
+    }
+
+    .header-row p {
+      font-size: 14px;
+      color: var(--gray-text);
+      line-height: 1.6;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--gray-mid);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.04);
+    }
+
+    .stat-card span {
+      display: block;
+      font-size: 12px;
+      color: var(--gray-text);
+      margin-bottom: 8px;
+    }
+
+    .stat-card strong {
+      font-size: 26px;
+      color: var(--blue);
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--gray-mid);
+      border-radius: 16px;
+      box-shadow: 0 6px 24px rgba(0,0,0,.06);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 18px 22px;
+      background: var(--blue);
+      color: var(--white);
+    }
+
+    .panel-header h2 {
+      font-size: 17px;
+      margin-bottom: 4px;
+    }
+
+    .panel-header p {
+      font-size: 12px;
+      color: rgba(255,255,255,.75);
+    }
+
+    .panel-body {
+      padding: 22px;
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 100px;
+      overflow: hidden;
+      transition:
+        opacity .35s ease,
+        transform .35s ease,
+        max-height .35s ease,
+        margin .35s ease,
+        padding .35s ease,
+        border-width .35s ease;
+    }
+
+    .message.success {
+      background: #e8f5e9;
+      color: var(--green);
+      border: 1px solid #c8e6c9;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: var(--red);
+      border: 1px solid #ffcdd2;
+    }
+
+    .message.hide {
+      opacity: 0;
+      transform: translateY(-8px);
+      max-height: 0;
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-width: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 12px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1.5px solid var(--gray-mid);
+      border-radius: 10px;
+      padding: 11px 13px;
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+      background: var(--white);
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--light-blue);
+      box-shadow: 0 0 0 3px rgba(0,111,207,.12);
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--yellow);
+      color: var(--blue);
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+      margin-top: 18px;
+    }
+
+    .submit-btn:hover {
+      background: #f0b400;
+      transform: translateY(-1px);
+    }
+
+    .table-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .table-tools input {
+      max-width: 280px;
+      padding: 10px 12px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    thead {
+      background: #f0f4f8;
+    }
+
+    th,
+    td {
+      padding: 13px 14px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #374151;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    td {
+      color: #333;
+    }
+
+    .airplane-name {
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .status {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status.available {
+      background: #e8f5e9;
+      color: var(--green);
+    }
+
+    .status.maintenance {
+      background: #fff3cd;
+      color: var(--orange);
+    }
+
+    .status.inactive {
+      background: #ffebee;
+      color: var(--red);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-buttons a,
+    .action-buttons button {
+      border: none;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-family: var(--font);
+    }
+
+    .edit-btn {
+      background: #eff6ff;
+      color: var(--light-blue);
+    }
+
+    .delete-btn {
+      background: #ffebee;
+      color: var(--red);
+    }
+
+    .empty-table-row td {
+      text-align: center;
+      padding: 34px 20px;
+      color: var(--gray-text);
+      font-size: 13px;
+      background: #fafafa;
+    }
+
+    .empty-state {
+      padding: 34px 20px;
+      text-align: center;
+      color: var(--gray-text);
+      font-size: 13px;
+      background: #fafafa;
+      border-radius: 12px;
+      border: 1px dashed var(--gray-mid);
+      margin-top: 14px;
+    }
+
+    @media (max-width: 1150px) {
+      .dashboard-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 650px) {
+      nav {
+        height: auto;
+        padding: 16px;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .nav-actions {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .main-content {
+        padding: 22px 14px;
+      }
+
+      .header-row {
+        flex-direction: column;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .table-tools {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .table-tools input {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <a th:href="@{/}" class="logo">
+    <svg viewBox="0 0 220 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="38" font-family="Poppins,sans-serif" font-weight="700" font-size="36" fill="#FFC72C">expedia</text>
+    </svg>
+  </a>
+
+  <div class="nav-actions">
+    <a th:href="@{/flightProviderDashboard}">Dashboard</a>
+    <a th:href="@{/flightProviderAirplanes}">Airplanes</a>
+    <a th:href="@{/logout}" class="logout-btn">Logout</a>
+  </div>
+</nav>
+
+<div class="dashboard-layout">
+
+  <aside class="sidebar">
+    <div class="provider-card">
+      <h3 th:text="${providerName != null} ? ${providerName} : 'Flight Provider'">Flight Provider</h3>
+      <p>Manage airplanes, aircraft capacity, and flight availability.</p>
+    </div>
+
+    <div class="side-menu">
+      <a th:href="@{/flightProviderDashboard}">✈️ Flight Dashboard</a>
+      <a th:href="@{/flightProviderAirplanes}" class="active">🛫 Airplanes</a>
+      <a th:href="@{/flightProviderSchedules}">🗓️ Schedules</a>
+      <a th:href="@{/flightProviderBookings}">🎫 Bookings</a>
+      <a th:href="@{/flightProviderSettings}">⚙️ Settings</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <div class="header-row">
+      <div>
+        <h1>Manage Airplanes</h1>
+        <p>
+          Add airplane records for this flight provider. These airplanes can later be selected
+          when creating flight schedules.
+        </p>
+      </div>
+    </div>
+
+    <section class="stats-grid">
+      <div class="stat-card">
+        <span>Total Airplanes</span>
+        <strong th:text="${totalAirplanes != null} ? ${totalAirplanes} : '0'">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Available Airplanes</span>
+        <strong th:text="${availableAirplanes != null} ? ${availableAirplanes} : '0'">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Total Seat Capacity</span>
+        <strong th:text="${totalSeatCapacity != null} ? ${totalSeatCapacity} : '0'">0</strong>
+      </div>
+    </section>
+
+    <section class="content-grid">
+
+      <!-- ADD AIRPLANE FORM -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Add New Airplane</h2>
+          <p>Register an airplane and its maximum seat capacity. New airplanes require admin approval.</p>
+        </div>
+
+        <div class="panel-body">
+
+          <div th:if="${successMessage}" class="message success" th:text="${successMessage}">
+            Airplane submitted for admin approval.
+          </div>
+
+          <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}">
+            Something went wrong.
+          </div>
+
+          <form th:action="@{/flightProviderAirplanes/addAirplane}" method="post">
+
+            <div class="form-grid">
+
+              <div class="field-group full">
+                <label for="airplaneName">Airplane Name</label>
+                <input
+                  type="text"
+                  id="airplaneName"
+                  name="airplaneName"
+                  placeholder="Example: Cebu Pacific Airbus"
+                  required
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="airplaneModel">Airplane Model</label>
+                <input
+                  type="text"
+                  id="airplaneModel"
+                  name="airplaneModel"
+                  placeholder="Example: Airbus A320"
+                  required
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="airplaneCode">Airplane Code</label>
+                <input
+                  type="text"
+                  id="airplaneCode"
+                  name="airplaneCode"
+                  placeholder="Example: RP-C4101"
+                  required
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="maximumSeatCapacity">Maximum Seat Capacity</label>
+                <input
+                  type="number"
+                  id="maximumSeatCapacity"
+                  name="maximumSeatCapacity"
+                  placeholder="Example: 180"
+                  min="1"
+                  required
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="airplaneStatus">Airplane Status</label>
+                <select id="airplaneStatus" name="airplaneStatus" required>
+                  <option value="Available" selected>Available</option>
+                  <option value="Maintenance">Maintenance</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+
+            </div>
+
+            <button type="submit" class="submit-btn">
+              Submit Airplane for Approval
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- AIRPLANE LIST -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Registered Airplanes</h2>
+          <p>View airplanes created by this provider and monitor admin approval status.</p>
+        </div>
+
+        <div class="panel-body">
+
+          <div class="table-tools">
+            <input
+              type="text"
+              id="airplaneSearch"
+              placeholder="Search airplane, model, code..."
+              onkeyup="searchAirplanes()"
+            />
+          </div>
+
+          <div class="table-wrap">
+            <table id="airplanesTable">
+              <thead>
+                <tr>
+                  <th>Airplane Name</th>
+                  <th>Model</th>
+                  <th>Code</th>
+                  <th>Max Seats</th>
+                  <th>Airplane Status</th>
+                  <th>Approval</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr th:each="airplane : ${airplanes}" class="airplane-row">
+                  <td>
+                    <span class="airplane-name" th:text="${airplane.airplaneName}"></span>
+                  </td>
+
+                  <td th:text="${airplane.airplaneModel}"></td>
+                  <td th:text="${airplane.airplaneCode}"></td>
+                  <td th:text="${airplane.maximumSeatCapacity}"></td>
+
+                  <td>
+                    <span
+                      class="status"
+                      th:classappend="${airplane.airplaneStatus == 'Available'} ? ' available' : (${airplane.airplaneStatus == 'Maintenance'} ? ' maintenance' : ' inactive')"
+                      th:text="${airplane.airplaneStatus}">
+                    </span>
+                  </td>
+
+                  <td>
+                    <span class="status" th:text="${airplane.approvalStatus != null ? airplane.approvalStatus : 'Pending'}">Pending</span>
+                  </td>
+
+                  <td>
+                    <div class="action-buttons">
+                      <a class="edit-btn" th:href="@{/flightProviderAirplanes/editAirplane/{id}(id=${airplane.id})}">
+                        Edit
+                      </a>
+
+                      <a class="delete-btn" th:href="@{/flightProviderAirplanes/deleteAirplane/{id}(id=${airplane.id})}">
+                        Delete
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr th:if="${airplanes == null or #lists.isEmpty(airplanes)}" class="empty-table-row">
+                  <td colspan="7">No airplanes added yet.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="empty-state" id="emptyState" style="display:none;">
+            No matching airplanes found.
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const messages = document.querySelectorAll(".message");
+
+    messages.forEach(function (message) {
+      setTimeout(function () {
+        message.classList.add("hide");
+
+        setTimeout(function () {
+          message.remove();
+        }, 400);
+
+      }, 2000);
+    });
+  });
+
+  function searchAirplanes() {
+    const input = document.getElementById("airplaneSearch");
+    const filter = input.value.toLowerCase();
+    const rows = document.querySelectorAll("#airplanesTable tbody tr.airplane-row");
+    const emptyState = document.getElementById("emptyState");
+
+    let visibleCount = 0;
+
+    rows.forEach(function (row) {
+      const text = row.textContent.toLowerCase();
+
+      if (text.includes(filter)) {
+        row.style.display = "";
+        visibleCount++;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    if (rows.length === 0) {
+      emptyState.style.display = "none";
+      return;
+    }
+
+    emptyState.style.display = visibleCount === 0 ? "block" : "none";
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Booking Receipt</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f5f7fa; padding:30px; }
+    .receipt { max-width:700px; margin:auto; background:white; padding:30px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,.1); }
+    h1 { color:#003580; }
+    .row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
+    a { display:inline-block; margin-top:20px; color:#003580; font-weight:bold; }
+  </style>
+</head>
+<body>
+
+<div class="receipt">
+  <h1>Payment Receipt</h1>
+
+  <div class="row">
+    <strong>Receipt No.</strong>
+    <span th:text="${booking.receiptNumber}"></span>
+  </div>
+
+  <div class="row">
+    <strong>Customer</strong>
+    <span>
+      <span th:text="${user.firstName}"></span>
+      <span th:text="${user.lastName}"></span>
+    </span>
+  </div>
+
+  <div class="row">
+    <strong>Flight</strong>
+    <span th:text="${booking.flight.flightNumber}"></span>
+  </div>
+
+  <div class="row">
+    <strong>Route</strong>
+    <span>
+      <span th:text="${booking.flight.origin}"></span>
+      →
+      <span th:text="${booking.flight.destination}"></span>
+    </span>
+  </div>
+
+  <div class="row">
+    <strong>Date / Time</strong>
+    <span>
+      <span th:text="${booking.flight.flightDate}"></span>
+      |
+      <span th:text="${booking.flight.flightTime}"></span>
+    </span>
+  </div>
+
+  <div class="row">
+    <strong>Passengers</strong>
+    <span th:text="${booking.passengerCount}"></span>
+  </div>
+
+  <div class="row">
+    <strong>Payment Status</strong>
+    <span th:text="${booking.paymentStatus}"></span>
+  </div>
+
+  <div class="row">
+    <strong>Paid At</strong>
+    <span th:text="${booking.paidAt}"></span>
+  </div>
+
+  <a th:href="@{/userDashboard}">← Back to Dashboard</a>
+</div>
+
+</body>
+</html>

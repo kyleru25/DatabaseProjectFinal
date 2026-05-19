@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title th:text="${searchQuery != null} ? ${searchQuery + ' Hotels | Expedia'} : 'Search Results | Expedia'">
+    Search Results | Expedia
+  </title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #003580;
+      --yellow: #ffc72c;
+      --light-blue: #006fcf;
+      --green: #2e7d32;
+      --white: #fff;
+      --gray-bg: #f5f7fa;
+      --gray-mid: #e0e0e0;
+      --gray-text: #6b7280;
+      --text: #222;
+      --font: 'Poppins', sans-serif;
+    }
+    body { font-family: var(--font); background: var(--gray-bg); color: var(--text); }
+
+    /* ── TOP NAV ── */
+    nav.top-nav {
+      background: var(--blue); height: 60px;
+      display: flex; align-items: center; padding: 0 24px; gap: 24px;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .nav-logo-sm { text-decoration: none; flex-shrink: 0; }
+    .nav-logo-sm svg { width: 100px; }
+
+    /* ── INLINE SEARCH BAR (sticky) ── */
+    .search-bar-strip {
+      background: var(--blue); padding: 0 24px 12px;
+      position: sticky; top: 60px; z-index: 199;
+      border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+    .search-bar-inner {
+      display: flex; gap: 8px; align-items: flex-end;
+      max-width: 1200px; margin: 0 auto; flex-wrap: wrap;
+    }
+    .sfield { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 120px; }
+    .sfield label { font-size: 10px; font-weight: 600; color: rgba(255,255,255,.7); text-transform: uppercase; }
+    .sfield input, .sfield select {
+      background: var(--white); border: none; border-radius: 6px;
+      padding: 8px 12px; font-size: 13px; font-family: var(--font);
+      outline: none; color: var(--text); height: 38px;
+    }
+    .sfield input:focus { box-shadow: 0 0 0 2px var(--yellow); }
+    .sbtn {
+      background: var(--yellow); color: var(--blue); border: none;
+      border-radius: 6px; padding: 0 20px; height: 38px;
+      font-size: 14px; font-weight: 700; font-family: var(--font);
+      cursor: pointer; transition: background .2s; white-space: nowrap; align-self: flex-end;
+    }
+    .sbtn:hover { background: #f0b400; }
+    .nav-tabs {
+      display: flex; gap: 4px; margin-left: auto; align-items: center; flex-shrink: 0;
+    }
+    .nav-tabs a {
+      color: rgba(255,255,255,.75); font-size: 12px; text-decoration: none;
+      padding: 5px 12px; border-radius: 4px; transition: background .2s;
+    }
+    .nav-tabs a:hover { background: rgba(255,255,255,.12); }
+    .nav-tabs a.active { background: rgba(255,255,255,.15); color: var(--white); font-weight: 600; }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb {
+      background: var(--white); border-bottom: 1px solid var(--gray-mid);
+      padding: 8px 32px; font-size: 12px; color: var(--gray-text);
+    }
+    .breadcrumb a { color: var(--light-blue); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb span { margin: 0 6px; }
+
+    /* ── MAIN GRID ── */
+    .main-grid {
+      display: grid; grid-template-columns: 280px 1fr;
+      max-width: 1280px; margin: 24px auto; padding: 0 24px;
+      gap: 24px; align-items: start;
+    }
+
+    /* ── FILTER PANEL ── */
+    .filter-panel {
+      background: var(--white); border-radius: 12px;
+      border: 1px solid var(--gray-mid); overflow: hidden;
+      position: sticky; top: 136px;
+    }
+    .filter-header {
+      padding: 16px 20px; background: var(--blue); color: var(--white);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .filter-header h3 { font-size: 14px; font-weight: 600; }
+    .filter-header button {
+      background: none; border: none; color: rgba(255,255,255,.7);
+      font-size: 12px; cursor: pointer; font-family: var(--font);
+    }
+    .filter-header button:hover { color: var(--white); }
+    .filter-section { padding: 16px 20px; border-bottom: 1px solid var(--gray-mid); }
+    .filter-section:last-child { border-bottom: none; }
+    .filter-section h4 { font-size: 13px; font-weight: 600; margin-bottom: 12px; color: var(--text); }
+    .filter-opt {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px; cursor: pointer;
+    }
+    .filter-opt input[type=checkbox] { accent-color: var(--light-blue); width: 15px; height: 15px; }
+    .filter-opt label { font-size: 13px; color: var(--text); cursor: pointer; flex: 1; }
+    .filter-opt .count { font-size: 11px; color: var(--gray-text); }
+    .price-range { display: flex; gap: 10px; }
+    .price-range input {
+      flex: 1; padding: 7px 10px; border: 1.5px solid var(--gray-mid); border-radius: 6px;
+      font-size: 13px; font-family: var(--font); outline: none;
+    }
+    .price-range input:focus { border-color: var(--light-blue); }
+    .star-filter { display: flex; gap: 6px; flex-wrap: wrap; }
+    .star-btn {
+      padding: 5px 12px; border: 1.5px solid var(--gray-mid); border-radius: 20px;
+      font-size: 12px; font-family: var(--font); cursor: pointer; background: var(--white);
+      transition: all .2s;
+    }
+    .star-btn.active { background: var(--light-blue); color: var(--white); border-color: var(--light-blue); }
+    .star-btn:hover:not(.active) { border-color: var(--light-blue); }
+
+    /* ── RESULTS AREA ── */
+    .results-area { display: flex; flex-direction: column; gap: 16px; }
+
+    /* SORT / RESULTS HEADER */
+    .results-header {
+      background: var(--white); border-radius: 10px; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      border: 1px solid var(--gray-mid); flex-wrap: wrap; gap: 10px;
+    }
+    .results-header p { font-size: 14px; color: var(--text); }
+    .results-header p strong { color: var(--blue); }
+    .sort-row { display: flex; align-items: center; gap: 10px; }
+    .sort-row label { font-size: 13px; color: var(--gray-text); }
+    .sort-row select {
+      border: 1.5px solid var(--gray-mid); border-radius: 6px;
+      padding: 6px 12px; font-size: 13px; font-family: var(--font);
+      outline: none; color: var(--text);
+    }
+    .sort-row select:focus { border-color: var(--light-blue); }
+    .view-toggle { display: flex; gap: 4px; }
+    .view-toggle button {
+      width: 32px; height: 32px; border: 1.5px solid var(--gray-mid);
+      border-radius: 6px; background: var(--white); cursor: pointer;
+      font-size: 14px; transition: all .2s;
+    }
+    .view-toggle button.active { background: var(--light-blue); border-color: var(--light-blue); }
+
+    /* MAP BANNER */
+    .map-banner {
+      background: linear-gradient(90deg, #003580, #006fcf);
+      border-radius: 10px; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .map-banner p { color: var(--white); font-size: 13px; }
+    .map-banner p strong { display: block; font-size: 15px; margin-bottom: 2px; }
+    .map-banner button {
+      background: var(--yellow); color: var(--blue);
+      border: none; border-radius: 6px; padding: 9px 18px;
+      font-size: 13px; font-weight: 700; font-family: var(--font); cursor: pointer;
+    }
+
+    /* HOTEL CARD */
+    .hotel-card {
+      background: var(--white); border-radius: 12px;
+      border: 1px solid var(--gray-mid); overflow: hidden;
+      display: flex; transition: box-shadow .25s, transform .2s;
+    }
+    .hotel-card:hover { box-shadow: 0 8px 32px rgba(0,0,0,.14); transform: translateY(-2px); }
+    .hotel-card-img {
+      width: 260px; min-height: 200px; flex-shrink: 0;
+      position: relative; overflow: hidden;
+    }
+    .hotel-card-img img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      transition: transform .4s;
+    }
+    .hotel-card:hover .hotel-card-img img { transform: scale(1.04); }
+    .img-badge {
+      position: absolute; top: 10px; left: 10px;
+      background: var(--yellow); color: var(--blue);
+      font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 20px;
+    }
+    .heart-btn {
+      position: absolute; top: 10px; right: 10px;
+      background: rgba(255,255,255,.9); border: none;
+      width: 32px; height: 32px; border-radius: 50%;
+      font-size: 16px; cursor: pointer; transition: transform .2s;
+    }
+    .heart-btn:hover { transform: scale(1.2); }
+    .hotel-card-body {
+      padding: 20px 24px; flex: 1;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .hotel-card-top { margin-bottom: 12px; }
+    .hotel-name { font-size: 17px; font-weight: 700; color: var(--blue); margin-bottom: 4px; }
+    .hotel-name a { color: inherit; text-decoration: none; }
+    .hotel-name a:hover { text-decoration: underline; }
+    .hotel-meta { font-size: 12px; color: var(--gray-text); margin-bottom: 8px; }
+    .hotel-meta a { color: var(--light-blue); text-decoration: none; }
+    .stars-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+    .stars { color: var(--yellow); font-size: 14px; }
+    .rating-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--blue); color: var(--white);
+      font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 6px;
+    }
+    .review-count { font-size: 12px; color: var(--gray-text); }
+    .amenities { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .amenity-tag {
+      font-size: 11px; background: #f0f4f8; color: var(--gray-text);
+      padding: 3px 8px; border-radius: 4px;
+    }
+    .cancellation {
+      font-size: 12px; color: var(--green); font-weight: 500;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .hotel-card-price {
+      text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end;
+      justify-content: flex-end; padding-left: 16px; border-left: 1px solid var(--gray-mid);
+      min-width: 150px;
+    }
+    .was-price { font-size: 12px; color: #aaa; text-decoration: line-through; }
+    .now-price { font-size: 26px; font-weight: 700; color: var(--text); line-height: 1; }
+    .per-night { font-size: 11px; color: var(--gray-text); margin-bottom: 4px; }
+    .total-price { font-size: 11px; color: var(--gray-text); margin-bottom: 12px; }
+    .discount-badge {
+      display: inline-block; background: #fef2f2; color: #c00;
+      font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 4px; margin-bottom: 8px;
+    }
+    .btn-book {
+      background: var(--yellow); color: var(--blue);
+      border: none; border-radius: 8px; padding: 10px 20px;
+      font-size: 14px; font-weight: 700; font-family: var(--font); cursor: pointer;
+      width: 100%; transition: background .2s;
+    }
+    .btn-book:hover { background: #f0b400; }
+    .member-price-note {
+      font-size: 10px; color: var(--light-blue); margin-top: 6px; text-align: center;
+    }
+
+    /* PAGINATION */
+    .pagination {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 24px 0;
+    }
+    .page-btn {
+      width: 36px; height: 36px; border: 1.5px solid var(--gray-mid);
+      border-radius: 6px; background: var(--white);
+      font-size: 13px; font-family: var(--font); cursor: pointer;
+      transition: all .2s; display: flex; align-items: center; justify-content: center;
+    }
+    .page-btn.active { background: var(--light-blue); border-color: var(--light-blue); color: var(--white); font-weight: 700; }
+    .page-btn:hover:not(.active) { border-color: var(--light-blue); color: var(--light-blue); }
+    .page-btn:disabled { opacity: .4; cursor: default; }
+
+    /* FOOTER */
+    footer {
+      background: #1a1a2e; color: #ccc; padding: 32px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      margin-top: 48px;
+    }
+    footer p { font-size: 12px; color: #888; }
+    footer nav a { color: #888; font-size: 12px; text-decoration: none; margin-left: 16px; }
+    footer nav a:hover { color: #fff; }
+
+    @media (max-width: 900px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .filter-panel { position: static; }
+      .hotel-card { flex-direction: column; }
+      .hotel-card-img { width: 100%; height: 220px; }
+      .hotel-card-price { flex-direction: row; border-left: none; border-top: 1px solid var(--gray-mid); padding: 16px 20px; min-width: 0; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════ TOP NAV ═══════════ -->
+<nav class="top-nav">
+  <a th:href="@{/}" class="nav-logo-sm">
+    <svg viewBox="0 0 220 50" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="38" font-family="Poppins,sans-serif" font-weight="700" font-size="36" fill="#FFC72C">expedia</text>
+    </svg>
+  </a>
+  <div class="nav-tabs">
+    <a th:href="@{/stays}" class="active">Stays</a>
+    <a th:href="@{/flights}">Flights</a>
+    <a th:href="@{/cars}">Cars</a>
+    <a th:href="@{/packages}">Packages</a>
+  </div>
+  <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
+    <a th:href="@{/trips}" style="color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;">Trips</a>
+    <a th:href="@{/login}" style="color:rgba(255,255,255,.8);text-decoration:none;font-size:13px;border:1.5px solid rgba(255,255,255,.5);padding:5px 14px;border-radius:20px;">Sign In</a>
+  </div>
+</nav>
+
+<!-- ═══════════ STICKY SEARCH BAR ═══════════ -->
+<div class="search-bar-strip">
+  <form th:action="@{/search}" method="get">
+    <div class="search-bar-inner">
+      <div class="sfield" style="flex:2;">
+        <label>Going to</label>
+        <input type="text" name="destination" th:value="${searchQuery}" placeholder="City, hotel, or airport"/>
+      </div>
+      <div class="sfield">
+        <label>Check-in</label>
+        <input type="date" name="checkin" th:value="${checkin}"/>
+      </div>
+      <div class="sfield">
+        <label>Check-out</label>
+        <input type="date" name="checkout" th:value="${checkout}"/>
+      </div>
+      <div class="sfield">
+        <label>Travelers</label>
+        <select name="travelers">
+          <option>1 room, 2 adults</option>
+          <option>1 room, 1 adult</option>
+          <option>2 rooms, 4 adults</option>
+        </select>
+      </div>
+      <button type="submit" class="sbtn">Search</button>
+    </div>
+  </form>
+</div>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb">
+  <a th:href="@{/}">Home</a>
+  <span>›</span>
+  <a th:href="@{/stays}">Hotels</a>
+  <span>›</span>
+  <span th:text="${searchQuery != null} ? ${searchQuery} : 'Search Results'">Search Results</span>
+</div>
+
+<!-- ═══════════ MAIN GRID ═══════════ -->
+<div class="main-grid">
+
+  <!-- ── FILTER PANEL ── -->
+  <aside class="filter-panel">
+    <div class="filter-header">
+      <h3>Filters</h3>
+      <button type="button" onclick="clearFilters()">Clear all</button>
+    </div>
+
+    <form th:action="@{/search}" method="get" id="filter-form">
+      <input type="hidden" name="destination" th:value="${searchQuery}"/>
+      <input type="hidden" name="checkin" th:value="${checkin}"/>
+      <input type="hidden" name="checkout" th:value="${checkout}"/>
+
+      <!-- Price Range -->
+      <div class="filter-section">
+        <h4>Price per night</h4>
+        <div class="price-range">
+          <input type="number" name="minPrice" th:value="${minPrice}" placeholder="$ Min"/>
+          <input type="number" name="maxPrice" th:value="${maxPrice}" placeholder="$ Max"/>
+        </div>
+      </div>
+
+      <!-- Star Rating -->
+      <div class="filter-section">
+        <h4>Star rating</h4>
+        <div class="star-filter">
+          <button type="button" class="star-btn" th:classappend="${#lists.contains(selectedStars,'5')} ? ' active'" onclick="toggleStar(this,'5')">⭐⭐⭐⭐⭐</button>
+          <button type="button" class="star-btn" th:classappend="${#lists.contains(selectedStars,'4')} ? ' active'" onclick="toggleStar(this,'4')">⭐⭐⭐⭐</button>
+          <button type="button" class="star-btn" th:classappend="${#lists.contains(selectedStars,'3')} ? ' active'" onclick="toggleStar(this,'3')">⭐⭐⭐</button>
+          <button type="button" class="star-btn" th:classappend="${#lists.contains(selectedStars,'2')} ? ' active'" onclick="toggleStar(this,'2')">⭐⭐</button>
+        </div>
+      </div>
+
+      <!-- Guest Rating -->
+      <div class="filter-section">
+        <h4>Guest rating</h4>
+        <div class="filter-opt">
+          <input type="checkbox" id="r-exc" name="rating" value="excellent" th:checked="${#lists.contains(selectedRatings,'excellent')}"/>
+          <label for="r-exc">Excellent (9+)</label> <span class="count">124</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="r-vgd" name="rating" value="verygood" th:checked="${#lists.contains(selectedRatings,'verygood')}"/>
+          <label for="r-vgd">Very Good (8+)</label> <span class="count">316</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="r-gd" name="rating" value="good" th:checked="${#lists.contains(selectedRatings,'good')}"/>
+          <label for="r-gd">Good (7+)</label> <span class="count">489</span>
+        </div>
+      </div>
+
+      <!-- Amenities -->
+      <div class="filter-section">
+        <h4>Amenities</h4>
+        <div class="filter-opt">
+          <input type="checkbox" id="a-pool" name="amenity" value="pool" th:checked="${#lists.contains(selectedAmenities,'pool')}"/>
+          <label for="a-pool">Swimming pool</label> <span class="count">198</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="a-wifi" name="amenity" value="wifi" th:checked="${#lists.contains(selectedAmenities,'wifi')}"/>
+          <label for="a-wifi">Free WiFi</label> <span class="count">541</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="a-park" name="amenity" value="parking" th:checked="${#lists.contains(selectedAmenities,'parking')}"/>
+          <label for="a-park">Free parking</label> <span class="count">312</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="a-gym" name="amenity" value="gym" th:checked="${#lists.contains(selectedAmenities,'gym')}"/>
+          <label for="a-gym">Fitness centre</label> <span class="count">267</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="a-spa" name="amenity" value="spa" th:checked="${#lists.contains(selectedAmenities,'spa')}"/>
+          <label for="a-spa">Spa</label> <span class="count">88</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="a-bf" name="amenity" value="breakfast" th:checked="${#lists.contains(selectedAmenities,'breakfast')}"/>
+          <label for="a-bf">Breakfast included</label> <span class="count">143</span>
+        </div>
+      </div>
+
+      <!-- Property Type -->
+      <div class="filter-section">
+        <h4>Property type</h4>
+        <div class="filter-opt">
+          <input type="checkbox" id="pt-hotel" name="propertyType" value="hotel" th:checked="${#lists.contains(propertyTypes,'hotel')}"/>
+          <label for="pt-hotel">Hotel</label> <span class="count">412</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="pt-res" name="propertyType" value="resort" th:checked="${#lists.contains(propertyTypes,'resort')}"/>
+          <label for="pt-res">Resort</label> <span class="count">67</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="pt-apt" name="propertyType" value="apartment" th:checked="${#lists.contains(propertyTypes,'apartment')}"/>
+          <label for="pt-apt">Apartment</label> <span class="count">189</span>
+        </div>
+        <div class="filter-opt">
+          <input type="checkbox" id="pt-bb" name="propertyType" value="bnb" th:checked="${#lists.contains(propertyTypes,'bnb')}"/>
+          <label for="pt-bb">Bed &amp; Breakfast</label> <span class="count">43</span>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <button type="submit" style="width:100%;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;">Apply filters</button>
+      </div>
+    </form>
+  </aside>
+
+  <!-- ── RESULTS AREA ── -->
+  <div class="results-area">
+
+    <!-- Sort / Results header -->
+    <div class="results-header">
+      <p>
+        <strong th:text="${totalResults != null} ? ${totalResults} : '1,284'">1,284</strong>
+        properties found in
+        <strong th:text="${searchQuery != null} ? ${searchQuery} : 'your destination'">your destination</strong>
+      </p>
+      <div class="sort-row">
+        <label for="sort-by">Sort by:</label>
+        <select id="sort-by" name="sort" onchange="document.getElementById('filter-form').submit()">
+          <option value="recommended" th:selected="${sort == 'recommended'}">Recommended</option>
+          <option value="price_asc" th:selected="${sort == 'price_asc'}">Price: Low to High</option>
+          <option value="price_desc" th:selected="${sort == 'price_desc'}">Price: High to Low</option>
+          <option value="rating" th:selected="${sort == 'rating'}">Guest Rating</option>
+          <option value="stars" th:selected="${sort == 'stars'}">Stars</option>
+        </select>
+        <div class="view-toggle">
+          <button type="button" class="active" title="List view">☰</button>
+          <button type="button" title="Grid view">⊞</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAP BANNER -->
+    <div class="map-banner">
+      <p><strong>See results on map</strong>Explore hotels by neighbourhood</p>
+      <button type="button">View map →</button>
+    </div>
+
+    <!-- ── HOTEL CARDS (Thymeleaf iteration) ── -->
+    <div th:each="hotel : ${hotels}" class="hotel-card">
+      <div class="hotel-card-img">
+        <img th:src="${hotel.imageUrl}" th:alt="${hotel.name}" loading="lazy"/>
+        <span class="img-badge" th:if="${hotel.badge}" th:text="${hotel.badge}">Deal</span>
+        <button class="heart-btn" th:onclick="|toggleWishlist('${hotel.id}')|">🤍</button>
+      </div>
+      <div class="hotel-card-body">
+        <div class="hotel-card-top">
+          <div class="hotel-name">
+            <a th:href="@{/hotel/{id}(id=${hotel.id})}" th:text="${hotel.name}">Hotel Name</a>
+          </div>
+          <div class="hotel-meta">
+            <a th:href="#" th:text="${hotel.location}">Location</a> ·
+            <span th:text="${hotel.distanceFromCenter}">0.5 km from centre</span>
+          </div>
+          <div class="stars-row">
+            <div class="stars" th:text="${hotel.stars}">★★★★☆</div>
+            <div class="rating-pill">
+              <span th:text="${hotel.guestRating}">8.9</span>
+            </div>
+            <span class="review-count" th:text="'(' + ${hotel.reviewCount} + ' reviews)'">reviews</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity-tag" th:each="amenity : ${hotel.amenities}" th:text="${amenity}">WiFi</span>
+          </div>
+          <p class="cancellation" th:if="${hotel.freeCancellation}">✓ Free cancellation</p>
+        </div>
+      </div>
+      <div class="hotel-card-price">
+        <span class="was-price" th:if="${hotel.originalPrice}" th:text="'$' + ${hotel.originalPrice}">$300</span>
+        <span class="discount-badge" th:if="${hotel.discountPct}" th:text="'-' + ${hotel.discountPct} + '%'">-20%</span>
+        <span class="now-price" th:text="'$' + ${hotel.salePrice}">$199</span>
+        <span class="per-night">per night</span>
+        <span class="total-price" th:text="'$' + ${hotel.totalPrice} + ' total'">$398 total</span>
+        <a th:href="@{/hotel/{id}(id=${hotel.id})}">
+          <button class="btn-book">Reserve</button>
+        </a>
+        <p class="member-price-note" th:if="${hotel.memberPrice}">
+          Member price available
+        </p>
+      </div>
+    </div>
+
+    <!-- ── STATIC FALLBACK CARDS ── -->
+    <div class="hotel-card">
+      <div class="hotel-card-img">
+        <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=600&q=80" alt="Hotel"/>
+        <span class="img-badge">🔥 Hot deal</span>
+        <button class="heart-btn" onclick="this.textContent='❤️'">🤍</button>
+      </div>
+      <div class="hotel-card-body">
+        <div class="hotel-card-top">
+          <div class="hotel-name"><a href="#">The Langham, London</a></div>
+          <div class="hotel-meta"><a href="#">Marylebone, London</a> · 0.3 km from centre</div>
+          <div class="stars-row">
+            <div class="stars">★★★★★</div>
+            <div class="rating-pill">9.2</div>
+            <span class="review-count">(2,840 reviews)</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity-tag">Free WiFi</span>
+            <span class="amenity-tag">Pool</span>
+            <span class="amenity-tag">Spa</span>
+            <span class="amenity-tag">Restaurant</span>
+            <span class="amenity-tag">Breakfast incl.</span>
+          </div>
+          <p class="cancellation">✓ Free cancellation before May 20</p>
+        </div>
+      </div>
+      <div class="hotel-card-price">
+        <span class="was-price">$420</span>
+        <span class="discount-badge">-29%</span>
+        <span class="now-price">$299</span>
+        <span class="per-night">per night</span>
+        <span class="total-price">$598 total</span>
+        <button class="btn-book">Reserve</button>
+        <p class="member-price-note">🔑 Member price available</p>
+      </div>
+    </div>
+
+    <div class="hotel-card">
+      <div class="hotel-card-img">
+        <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80" alt="Hotel"/>
+        <button class="heart-btn" onclick="this.textContent='❤️'">🤍</button>
+      </div>
+      <div class="hotel-card-body">
+        <div class="hotel-card-top">
+          <div class="hotel-name"><a href="#">Aloft London Excel</a></div>
+          <div class="hotel-meta"><a href="#">Royal Docks, London</a> · 1.2 km from centre</div>
+          <div class="stars-row">
+            <div class="stars">★★★★☆</div>
+            <div class="rating-pill">8.4</div>
+            <span class="review-count">(1,102 reviews)</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity-tag">Free WiFi</span>
+            <span class="amenity-tag">Fitness centre</span>
+            <span class="amenity-tag">Bar</span>
+          </div>
+          <p class="cancellation">✓ Free cancellation</p>
+        </div>
+      </div>
+      <div class="hotel-card-price">
+        <span class="now-price">$149</span>
+        <span class="per-night">per night</span>
+        <span class="total-price">$298 total</span>
+        <button class="btn-book">Reserve</button>
+      </div>
+    </div>
+
+    <div class="hotel-card">
+      <div class="hotel-card-img">
+        <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=600&q=80" alt="Hotel"/>
+        <span class="img-badge">Member Deal</span>
+        <button class="heart-btn" onclick="this.textContent='❤️'">🤍</button>
+      </div>
+      <div class="hotel-card-body">
+        <div class="hotel-card-top">
+          <div class="hotel-name"><a href="#">citizenM Tower of London</a></div>
+          <div class="hotel-meta"><a href="#">Tower Hill, London</a> · 0.1 km from Tower of London</div>
+          <div class="stars-row">
+            <div class="stars">★★★★☆</div>
+            <div class="rating-pill">9.0</div>
+            <span class="review-count">(3,421 reviews)</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity-tag">Free WiFi</span>
+            <span class="amenity-tag">Rooftop bar</span>
+            <span class="amenity-tag">24hr reception</span>
+          </div>
+          <p class="cancellation">✓ Free cancellation before May 22</p>
+        </div>
+      </div>
+      <div class="hotel-card-price">
+        <span class="was-price">$210</span>
+        <span class="discount-badge">-14%</span>
+        <span class="now-price">$181</span>
+        <span class="per-night">per night</span>
+        <span class="total-price">$362 total</span>
+        <button class="btn-book">Reserve</button>
+        <p class="member-price-note">🔑 Member price available</p>
+      </div>
+    </div>
+
+    <div class="hotel-card">
+      <div class="hotel-card-img">
+        <img src="https://images.unsplash.com/photo-1444201983204-c43cbd584d93?w=600&q=80" alt="Hotel"/>
+        <button class="heart-btn" onclick="this.textContent='❤️'">🤍</button>
+      </div>
+      <div class="hotel-card-body">
+        <div class="hotel-card-top">
+          <div class="hotel-name"><a href="#">Park Plaza Westminster Bridge</a></div>
+          <div class="hotel-meta"><a href="#">South Bank, London</a> · Next to Westminster Bridge</div>
+          <div class="stars-row">
+            <div class="stars">★★★★★</div>
+            <div class="rating-pill">8.7</div>
+            <span class="review-count">(4,089 reviews)</span>
+          </div>
+          <div class="amenities">
+            <span class="amenity-tag">Free WiFi</span>
+            <span class="amenity-tag">Pool</span>
+            <span class="amenity-tag">Gym</span>
+            <span class="amenity-tag">Spa</span>
+            <span class="amenity-tag">River view</span>
+          </div>
+          <p class="cancellation">✓ Free cancellation</p>
+        </div>
+      </div>
+      <div class="hotel-card-price">
+        <span class="was-price">$380</span>
+        <span class="discount-badge">-21%</span>
+        <span class="now-price">$299</span>
+        <span class="per-night">per night</span>
+        <span class="total-price">$598 total</span>
+        <button class="btn-book">Reserve</button>
+      </div>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination">
+      <button class="page-btn" disabled>‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <button class="page-btn">4</button>
+      <button class="page-btn">5</button>
+      <span style="padding:0 4px;color:#aaa;">…</span>
+      <button class="page-btn">32</button>
+      <button class="page-btn">›</button>
+    </div>
+
+  </div><!-- /results-area -->
+</div><!-- /main-grid -->
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Expedia, Inc. All rights reserved.</p>
+  <nav>
+    <a th:href="@{/privacy}">Privacy</a>
+    <a th:href="@{/terms}">Terms</a>
+    <a th:href="@{/help}">Help</a>
+    <a th:href="@{/accessibility}">Accessibility</a>
+  </nav>
+</footer>
+
+<script th:inline="javascript">
+  function toggleWishlist(id) {
+    const btn = document.querySelector(`[onclick*="${id}"]`);
+    if (btn) btn.textContent = btn.textContent === '🤍' ? '❤️' : '🤍';
+  }
+  function clearFilters() {
+    document.querySelectorAll('#filter-form input[type=checkbox]').forEach(cb => cb.checked = false);
+    document.querySelectorAll('#filter-form input[type=number]').forEach(n => n.value = '');
+    document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('active'));
+  }
+  function toggleStar(btn, val) {
+    btn.classList.toggle('active');
+  }
+  // Pagination
+  document.querySelectorAll('.page-btn:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

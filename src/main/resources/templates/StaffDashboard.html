@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff Dashboard | Expedia</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --blue: #003580;
+      --light-blue: #006fcf;
+      --yellow: #ffc72c;
+      --white: #ffffff;
+      --bg: #f5f7fa;
+      --border: #d1d5db;
+      --text: #222222;
+      --muted: #6b7280;
+      --green: #2e7d32;
+      --red: #c62828;
+      --orange: #b45309;
+      --purple: #5b21b6;
+      --font: 'Poppins', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    nav {
+      height: 64px;
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      text-decoration: none;
+    }
+
+    .logo svg {
+      width: 120px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      color: var(--white);
+      font-size: 13px;
+    }
+
+    .staff-mini {
+      text-align: right;
+      line-height: 1.3;
+    }
+
+    .staff-mini strong {
+      display: block;
+      font-size: 13px;
+    }
+
+    .staff-mini span {
+      font-size: 11px;
+      color: rgba(255,255,255,.75);
+    }
+
+    .logout-btn {
+      color: var(--white);
+      text-decoration: none;
+      border: 1.5px solid rgba(255,255,255,.85);
+      padding: 7px 14px;
+      border-radius: 20px;
+      font-weight: 600;
+      transition: background .2s;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255,255,255,.15);
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+
+    .sidebar {
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 26px 20px;
+    }
+
+    .staff-card {
+      background: linear-gradient(135deg, #78350f, #b45309 45%, #003580);
+      color: var(--white);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+    }
+
+    .staff-card .badge {
+      display: inline-block;
+      background: var(--yellow);
+      color: var(--blue);
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .staff-card h3 {
+      font-size: 16px;
+      margin-bottom: 5px;
+    }
+
+    .staff-card p {
+      font-size: 12px;
+      color: rgba(255,255,255,.8);
+      line-height: 1.5;
+    }
+
+    .side-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .side-menu a {
+      color: #333;
+      text-decoration: none;
+      font-size: 13px;
+      padding: 11px 12px;
+      border-radius: 10px;
+      transition: background .2s, color .2s;
+    }
+
+    .side-menu a.active,
+    .side-menu a:hover {
+      background: #eff6ff;
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    main {
+      padding: 32px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 26px;
+    }
+
+    .header h1 {
+      color: var(--blue);
+      font-size: 30px;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .date-pill {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 10px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      box-shadow: 0 4px 14px rgba(0,0,0,.04);
+      white-space: nowrap;
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 100px;
+      overflow: hidden;
+      transition:
+        opacity .35s ease,
+        transform .35s ease,
+        max-height .35s ease,
+        margin .35s ease,
+        padding .35s ease,
+        border-width .35s ease;
+    }
+
+    .message.success {
+      background: #e8f5e9;
+      color: var(--green);
+      border: 1px solid #c8e6c9;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: var(--red);
+      border: 1px solid #ffcdd2;
+    }
+
+    .message.hide {
+      opacity: 0;
+      transform: translateY(-8px);
+      max-height: 0;
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-width: 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 26px;
+    }
+
+    .stat-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0,0,0,.05);
+    }
+
+    .stat-card span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-card strong {
+      font-size: 30px;
+      color: var(--blue);
+    }
+
+    .stat-card.pending strong {
+      color: var(--orange);
+    }
+
+    .stat-card.approved strong {
+      color: var(--green);
+    }
+
+    .stat-card.paid strong {
+      color: var(--purple);
+    }
+
+    .panel {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 8px 28px rgba(0,0,0,.06);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      background: var(--blue);
+      color: var(--white);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .panel-header h2 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .panel-header p {
+      color: rgba(255,255,255,.75);
+      font-size: 12px;
+    }
+
+    .panel-body {
+      padding: 22px;
+    }
+
+    .tools {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .tools input,
+    .tools select {
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 13px;
+      font-family: var(--font);
+      font-size: 13px;
+      outline: none;
+      background: var(--white);
+    }
+
+    .tools input {
+      width: 320px;
+      max-width: 100%;
+    }
+
+    .tools select {
+      width: 170px;
+    }
+
+    .tools input:focus,
+    .tools select:focus {
+      border-color: var(--light-blue);
+      box-shadow: 0 0 0 3px rgba(0,111,207,.12);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1050px;
+    }
+
+    thead {
+      background: #f0f4f8;
+    }
+
+    th,
+    td {
+      padding: 14px;
+      border-bottom: 1px solid #e5e7eb;
+      text-align: left;
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #374151;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      font-weight: 700;
+    }
+
+    .customer-name {
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    .customer-email {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .flight-route {
+      font-weight: 700;
+      color: #333;
+    }
+
+    .flight-meta {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .status.pending {
+      background: #fff3cd;
+      color: #946200;
+    }
+
+    .status.approved {
+      background: #e8f5e9;
+      color: var(--green);
+    }
+
+    .status.paid {
+      background: #ede9fe;
+      color: var(--purple);
+    }
+
+    .status.rejected {
+      background: #ffebee;
+      color: var(--red);
+    }
+
+    .payment.unpaid {
+      background: #f3f4f6;
+      color: #4b5563;
+    }
+
+    .payment.paid {
+      background: #e8f5e9;
+      color: var(--green);
+    }
+
+    .receipt {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .receipt.available {
+      color: var(--blue);
+      font-weight: 700;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .actions form {
+      display: inline;
+    }
+
+    .actions button {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: transform .15s, opacity .15s;
+    }
+
+    .actions button:hover {
+      transform: translateY(-1px);
+      opacity: .92;
+    }
+
+    .approve-btn {
+      background: #e8f5e9;
+      color: var(--green);
+    }
+
+    .reject-btn {
+      background: #ffebee;
+      color: var(--red);
+    }
+
+    .empty-row td {
+      text-align: center;
+      color: var(--muted);
+      padding: 36px 20px;
+      background: #fafafa;
+    }
+
+    .empty-state {
+      display: none;
+      text-align: center;
+      color: var(--muted);
+      padding: 32px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      margin-top: 14px;
+      background: #fafafa;
+      font-size: 13px;
+    }
+
+    @media (max-width: 1050px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .header {
+        flex-direction: column;
+      }
+
+      .tools {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .tools input,
+      .tools select {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 650px) {
+      nav {
+        height: auto;
+        padding: 16px;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .nav-right {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .staff-mini {
+        text-align: center;
+      }
+
+      main {
+        padding: 22px 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <a th:href="@{/}" class="logo">
+    <svg viewBox="0 0 220 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="38" font-family="Poppins,sans-serif" font-weight="700" font-size="36" fill="#FFC72C">expedia</text>
+    </svg>
+  </a>
+
+  <div class="nav-right">
+    <div class="staff-mini">
+      <strong th:text="${staffName}">Staff Name</strong>
+      <span><span th:text="${staffRole}">Staff Role</span> • <span th:text="${providerName}">Provider</span></span>
+    </div>
+
+    <a th:href="@{/staffLogout}" class="logout-btn">Logout</a>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="staff-card">
+      <span class="badge">STAFF PANEL</span>
+      <h3 th:text="${staffName}">Staff Name</h3>
+      <p>
+        Manage customer bookings for your assigned flight provider, review pending requests, approve bookings, and monitor payment status.
+      </p>
+    </div>
+
+    <div class="side-menu">
+      <a th:href="@{/staffDashboard}" class="active">🎫 Customer Bookings</a>
+      <a th:href="@{/staffDashboard}">✅ Booking Approval</a>
+      <a th:href="@{/staffDashboard}">🧾 Receipts</a>
+      <a th:href="@{/staffLogout}">🚪 Logout</a>
+    </div>
+  </aside>
+
+  <main>
+
+    <div class="header">
+      <div>
+        <h1>Staff Dashboard</h1>
+        <p>
+          Review booking requests for <strong th:text="${providerName}">your flight provider</strong>, approve valid bookings, reject invalid requests,
+          and verify payments and receipts.
+        </p>
+      </div>
+
+      <div class="date-pill">
+        <span th:text="${providerName}">Expedia Staff Operations</span>
+      </div>
+    </div>
+
+    <div th:if="${successMessage}" class="message success" th:text="${successMessage}">
+      Success message
+    </div>
+
+    <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}">
+      Error message
+    </div>
+
+    <section class="stats-grid">
+      <div class="stat-card pending">
+        <span>Pending Bookings</span>
+        <strong th:text="${pendingCount != null ? pendingCount : 0}">0</strong>
+      </div>
+
+      <div class="stat-card approved">
+        <span>Approved Bookings</span>
+        <strong th:text="${approvedCount != null ? approvedCount : 0}">0</strong>
+      </div>
+
+      <div class="stat-card paid">
+        <span>Paid Bookings</span>
+        <strong th:text="${paidCount != null ? paidCount : 0}">0</strong>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <h2>Customer Flight Bookings</h2>
+          <p>Approve pending customer bookings before payment is allowed.</p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+
+        <div class="tools">
+          <input
+            type="text"
+            id="bookingSearch"
+            placeholder="Search customer, flight, route, receipt..."
+            onkeyup="filterBookings()"
+          />
+
+          <select id="statusFilter" onchange="filterBookings()">
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="paid">Paid</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table id="bookingsTable">
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Customer</th>
+                <th>Flight Details</th>
+                <th>Passengers</th>
+                <th>Booking Status</th>
+                <th>Payment</th>
+                <th>Receipt</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr th:each="booking : ${bookings}" class="booking-row">
+                <td>
+                  #<span th:text="${booking.bookingId}">1</span>
+                </td>
+
+                <td>
+                  <span
+                    class="customer-name"
+                    th:text="${booking.user != null ? booking.user.firstName + ' ' + booking.user.lastName : 'Unknown Customer'}">
+                    Customer Name
+                  </span>
+
+                  <span
+                    class="customer-email"
+                    th:text="${booking.user != null ? booking.user.emailAddress : 'No email'}">
+                    customer@email.com
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="flight-route"
+                    th:text="${booking.flight != null ? booking.flight.origin + ' → ' + booking.flight.destination : 'No flight'}">
+                    Cebu → Manila
+                  </span>
+
+                  <span
+                    class="flight-meta"
+                    th:text="${booking.flight != null ? booking.flight.flightNumber + ' | ' + booking.flight.flightDate + ' | ' + booking.flight.flightTime : ''}">
+                    5J-562 | 2026-05-11 | 10:00
+                  </span>
+                </td>
+
+                <td th:text="${booking.passengerCount}">1</td>
+
+                <td>
+                  <span
+                    class="status"
+                    th:classappend="${booking.bookingStatus == 'Pending'} ? ' pending' : (${booking.bookingStatus == 'Approved'} ? ' approved' : (${booking.bookingStatus == 'Paid'} ? ' paid' : ' rejected'))"
+                    th:text="${booking.bookingStatus}">
+                    Pending
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    class="status payment"
+                    th:classappend="${booking.paymentStatus == 'Paid'} ? ' paid' : ' unpaid'"
+                    th:text="${booking.paymentStatus}">
+                    Unpaid
+                  </span>
+                </td>
+
+                <td>
+                  <span
+                    th:class="${booking.receiptNumber != null ? 'receipt available' : 'receipt'}"
+                    th:text="${booking.receiptNumber != null ? booking.receiptNumber : 'No receipt yet'}">
+                    No receipt yet
+                  </span>
+                </td>
+
+                <td>
+                  <div class="actions">
+                    <form
+                      th:if="${booking.bookingStatus == 'Pending'}"
+                      th:action="@{/staffDashboard/approveBooking/{id}(id=${booking.bookingId})}"
+                      method="post">
+                      <button type="submit" class="approve-btn">Approve</button>
+                    </form>
+
+                    <form
+                      th:if="${booking.bookingStatus == 'Pending'}"
+                      th:action="@{/staffDashboard/rejectBooking/{id}(id=${booking.bookingId})}"
+                      method="post">
+                      <button type="submit" class="reject-btn">Reject</button>
+                    </form>
+
+                    <span th:if="${booking.bookingStatus != 'Pending'}" style="color:#6b7280; font-size:12px;">
+                      No action needed
+                    </span>
+                  </div>
+                </td>
+              </tr>
+
+              <tr th:if="${bookings == null or #lists.isEmpty(bookings)}" class="empty-row">
+                <td colspan="8">No customer bookings yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="emptyState" class="empty-state">
+          No matching bookings found.
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const messages = document.querySelectorAll(".message");
+
+    messages.forEach(function (message) {
+      setTimeout(function () {
+        message.classList.add("hide");
+
+        setTimeout(function () {
+          message.remove();
+        }, 400);
+
+      }, 2000);
+    });
+  });
+
+  function filterBookings() {
+    const searchValue = document.getElementById("bookingSearch").value.toLowerCase();
+    const statusValue = document.getElementById("statusFilter").value.toLowerCase();
+    const rows = document.querySelectorAll("#bookingsTable tbody tr.booking-row");
+    const emptyState = document.getElementById("emptyState");
+
+    let visibleCount = 0;
+
+    rows.forEach(function (row) {
+      const rowText = row.textContent.toLowerCase();
+      const matchesSearch = rowText.includes(searchValue);
+      const matchesStatus = statusValue === "all" || rowText.includes(statusValue);
+
+      if (matchesSearch && matchesStatus) {
+        row.style.display = "";
+        visibleCount++;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    if (rows.length === 0) {
+      emptyState.style.display = "none";
+      return;
+    }
+
+    emptyState.style.display = visibleCount === 0 ? "block" : "none";
+  }
+</script>
+
+</body>
+</html>

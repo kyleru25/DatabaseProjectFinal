@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard | Expedia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root { --blue:#003580; --blue2:#006fcf; --yellow:#ffc72c; --bg:#f4f7fb; --card:#fff; --text:#111827; --muted:#6b7280; --line:#dbe3ee; --green:#1f7a3f; --red:#b91c1c; --orange:#b45309; --font:'Poppins',Arial,sans-serif; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+    .topbar { height: 68px; background: var(--blue); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 32px; position: sticky; top: 0; z-index: 10; }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; }
+    .brand span:first-child { width: 32px; height: 32px; display:grid; place-items:center; background:var(--yellow); color:var(--blue); border-radius:9px; }
+    .topbar a { color: white; text-decoration: none; border: 1px solid rgba(255,255,255,.75); border-radius: 999px; padding: 8px 14px; font-size: 13px; font-weight: 700; }
+    .layout { display: grid; grid-template-columns: 280px 1fr; min-height: calc(100vh - 68px); }
+    aside { background: white; border-right: 1px solid var(--line); padding: 28px 22px; }
+    .admin-card { background: linear-gradient(135deg,var(--blue),var(--blue2)); color: white; border-radius: 20px; padding: 22px; margin-bottom: 20px; box-shadow:0 18px 38px rgba(0,53,128,.18); }
+    .admin-card h3 { font-size: 16px; margin-bottom: 6px; }
+    .admin-card p { font-size: 12px; color: rgba(255,255,255,.8); line-height: 1.6; }
+    .side-note { background:#f8fafc; border:1px solid var(--line); border-radius: 16px; padding:16px; color:var(--muted); font-size:12px; line-height:1.7; }
+    main { padding: 34px; }
+    .header { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:24px; }
+    .header h1 { color: var(--blue); font-size: 32px; letter-spacing:-.7px; margin-bottom: 6px; }
+    .header p { color: var(--muted); line-height: 1.7; max-width: 760px; font-size: 14px; }
+    .stats { display:grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 24px; }
+    .stat { background:white; border:1px solid var(--line); border-radius:18px; padding:20px; box-shadow:0 8px 24px rgba(17,24,39,.06); }
+    .stat span { color: var(--muted); font-size:12px; display:block; margin-bottom:6px; }
+    .stat strong { color: var(--blue); font-size:32px; }
+    .message { padding: 12px 14px; border-radius: 12px; font-size: 13px; margin-bottom: 16px; }
+    .message.success { background: #eaf7ee; border: 1px solid #bfe8cc; color: var(--green); }
+    .message.error { background: #fff1f2; border: 1px solid #fecdd3; color: var(--red); }
+    .review-grid { display:grid; gap:22px; }
+    .panel { background:white; border:1px solid var(--line); border-radius:20px; overflow:hidden; box-shadow:0 8px 28px rgba(17,24,39,.07); }
+    .panel-head { background: var(--blue); color:white; padding:18px 22px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .panel-head h2 { font-size:18px; }
+    .panel-head span { background: var(--yellow); color: var(--blue); padding:6px 12px; border-radius:999px; font-weight:800; font-size:12px; }
+    table { width:100%; border-collapse:collapse; }
+    th, td { padding:14px 16px; text-align:left; border-bottom:1px solid #eef2f7; vertical-align:top; font-size:13px; }
+    th { background:#f8fafc; color:#374151; font-size:12px; text-transform:uppercase; letter-spacing:.35px; }
+    .muted { color: var(--muted); font-size: 12px; line-height:1.5; }
+    .status { display:inline-block; padding:6px 10px; border-radius:999px; font-size:11px; font-weight:800; text-transform:uppercase; background:#fff7ed; color:var(--orange); }
+    .actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .actions form { display:inline; }
+    button { border:none; border-radius:10px; padding:9px 12px; cursor:pointer; font-weight:800; font-family:inherit; font-size:12px; }
+    .approve { background:#dcfce7; color:#166534; }
+    .reject { background:#fee2e2; color:#991b1b; }
+    .empty { padding:30px; color:var(--muted); text-align:center; font-size:13px; }
+    @media (max-width:1050px) { .layout { grid-template-columns:1fr; } aside { display:none; } .stats { grid-template-columns:1fr; } }
+    @media (max-width:720px) { main { padding:22px; } table { display:block; overflow-x:auto; } }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><span>E</span><strong>expedia admin</strong></div>
+  <a th:href="@{/logout}">Logout</a>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="admin-card">
+      <h3 th:text="${adminName}">Expedia Administrator</h3>
+      <p>Review partner accounts, aircraft assets, and scheduled flights before they appear to travelers.</p>
+    </div>
+    <div class="side-note">
+      Approval rule:<br/>
+      1. Approve provider account.<br/>
+      2. Approve provider airplane.<br/>
+      3. Approve provider flight.<br/><br/>
+      Users only see flights after all required approvals are complete.
+    </div>
+  </aside>
+
+  <main>
+    <section class="header">
+      <div>
+        <h1>Admin approval center</h1>
+        <p>Keep the Expedia-style marketplace safe by reviewing new flight providers, their airplanes, and their submitted flight schedules.</p>
+      </div>
+    </section>
+
+    <div th:if="${successMessage}" class="message success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}"></div>
+
+    <section class="stats">
+      <div class="stat"><span>Pending providers</span><strong th:text="${pendingProviderCount}">0</strong></div>
+      <div class="stat"><span>Pending airplanes</span><strong th:text="${pendingAirplaneCount}">0</strong></div>
+      <div class="stat"><span>Pending flights</span><strong th:text="${pendingFlightCount}">0</strong></div>
+    </section>
+
+    <section class="review-grid">
+      <div class="panel">
+        <div class="panel-head"><h2>Flight provider applications</h2><span th:text="|${pendingProviderCount} pending|">0 pending</span></div>
+        <div th:if="${pendingProviders == null or #lists.isEmpty(pendingProviders)}" class="empty">No pending flight provider applications.</div>
+        <table th:if="${pendingProviders != null and !#lists.isEmpty(pendingProviders)}">
+          <thead><tr><th>Company</th><th>Representative</th><th>Permit</th><th>Contact</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr th:each="provider : ${pendingProviders}">
+              <td><strong th:text="${provider.companyName}">Airline</strong><div class="muted" th:text="${provider.companyAddress}">Address</div></td>
+              <td><span th:text="${provider.representativeFirstName + ' ' + provider.representativeLastName}">Name</span><div class="muted" th:text="${provider.providerType}">Type</div></td>
+              <td th:text="${provider.businessPermitNumber}">BP-000</td>
+              <td><span th:text="${provider.emailAddress}">email</span><div class="muted" th:text="${provider.contactNumber}">phone</div></td>
+              <td><span class="status" th:text="${provider.approvalStatus}">Pending</span></td>
+              <td><div class="actions">
+                <form th:action="@{/adminDashboard/providers/{id}/approve(id=${provider.flightProviderId})}" method="post"><button class="approve" type="submit">Approve</button></form>
+                <form th:action="@{/adminDashboard/providers/{id}/reject(id=${provider.flightProviderId})}" method="post"><button class="reject" type="submit">Reject</button></form>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Airplane submissions</h2><span th:text="|${pendingAirplaneCount} pending|">0 pending</span></div>
+        <div th:if="${pendingAirplanes == null or #lists.isEmpty(pendingAirplanes)}" class="empty">No pending airplane submissions.</div>
+        <table th:if="${pendingAirplanes != null and !#lists.isEmpty(pendingAirplanes)}">
+          <thead><tr><th>Airplane</th><th>Provider</th><th>Capacity</th><th>Operational status</th><th>Approval</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr th:each="airplane : ${pendingAirplanes}">
+              <td><strong th:text="${airplane.airplaneName}">Plane</strong><div class="muted" th:text="${airplane.airplaneModel + ' • ' + airplane.airplaneCode}">Model</div></td>
+              <td th:text="${airplane.flightProvider != null ? airplane.flightProvider.companyName : 'No provider'}">Provider</td>
+              <td th:text="${airplane.maximumSeatCapacity}">0</td>
+              <td th:text="${airplane.airplaneStatus}">Available</td>
+              <td><span class="status" th:text="${airplane.approvalStatus}">Pending</span></td>
+              <td><div class="actions">
+                <form th:action="@{/adminDashboard/airplanes/{id}/approve(id=${airplane.id})}" method="post"><button class="approve" type="submit">Approve</button></form>
+                <form th:action="@{/adminDashboard/airplanes/{id}/reject(id=${airplane.id})}" method="post"><button class="reject" type="submit">Reject</button></form>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2>Flight schedule submissions</h2><span th:text="|${pendingFlightCount} pending|">0 pending</span></div>
+        <div th:if="${pendingFlights == null or #lists.isEmpty(pendingFlights)}" class="empty">No pending flight schedules.</div>
+        <table th:if="${pendingFlights != null and !#lists.isEmpty(pendingFlights)}">
+          <thead><tr><th>Flight</th><th>Provider</th><th>Route</th><th>Date / Time</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr th:each="flight : ${pendingFlights}">
+              <td><strong th:text="${flight.flightNumber}">EX000</strong><div class="muted" th:text="${flight.airplane != null ? flight.airplane.airplaneName : 'No airplane'}">Airplane</div></td>
+              <td th:text="${flight.flightProvider != null ? flight.flightProvider.companyName : 'No provider'}">Provider</td>
+              <td><span th:text="${flight.origin}">Origin</span> → <span th:text="${flight.destination}">Destination</span></td>
+              <td><span th:text="${flight.flightDate}">Date</span><div class="muted" th:text="${flight.flightTime}">Time</div></td>
+              <td><span class="status" th:text="${flight.approvalStatus}">Pending</span></td>
+              <td><div class="actions">
+                <form th:action="@{/adminDashboard/flights/{id}/approve(id=${flight.id})}" method="post"><button class="approve" type="submit">Approve</button></form>
+                <form th:action="@{/adminDashboard/flights/{id}/reject(id=${flight.id})}" method="post"><button class="reject" type="submit">Reject</button></form>
+              </div></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff Registration | Expedia</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --blue: #003580;
+      --yellow: #ffc72c;
+      --white: #ffffff;
+      --gray-bg: #f5f7fa;
+      --gray-mid: #d1d5db;
+      --gray-text: #6b7280;
+      --text: #222222;
+      --orange: #b45309;
+      --orange-dark: #92400e;
+      --red: #c62828;
+      --green: #2e7d32;
+      --font: 'Poppins', sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--gray-bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    nav {
+      background: var(--blue);
+      height: 64px;
+      padding: 0 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      text-decoration: none;
+    }
+
+    .logo svg {
+      width: 120px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-links a {
+      color: rgba(255,255,255,.85);
+      text-decoration: none;
+      font-size: 13px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      transition: background .2s;
+    }
+
+    .nav-links a:hover {
+      background: rgba(255,255,255,.15);
+      color: var(--white);
+    }
+
+    .signin {
+      border: 1.5px solid rgba(255,255,255,.85);
+      font-weight: 600;
+    }
+
+    .page-wrapper {
+      padding: 46px 24px;
+    }
+
+    .register-container {
+      max-width: 1050px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: .95fr 1.25fr;
+      background: var(--white);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      border: 1px solid var(--gray-mid);
+    }
+
+    .info-panel {
+      background: linear-gradient(135deg, #78350f, #b45309 45%, #003580);
+      padding: 44px 38px;
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 620px;
+    }
+
+    .info-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url('https://images.unsplash.com/photo-1556761175-b413da4baf72?w=1200&q=80') center/cover no-repeat;
+      opacity: .16;
+    }
+
+    .info-content,
+    .small-note {
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--yellow);
+      color: var(--blue);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .info-panel h1 {
+      font-size: 34px;
+      line-height: 1.2;
+      margin-bottom: 14px;
+    }
+
+    .info-panel h1 span {
+      color: var(--yellow);
+    }
+
+    .info-panel p {
+      color: rgba(255,255,255,.86);
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 28px;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .feature-item {
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.22);
+      border-radius: 14px;
+      padding: 15px;
+    }
+
+    .feature-item strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .feature-item span {
+      display: block;
+      color: rgba(255,255,255,.78);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .small-note {
+      font-size: 12px;
+      color: rgba(255,255,255,.75);
+      line-height: 1.6;
+      margin-top: 30px;
+    }
+
+    .form-panel {
+      padding: 42px 42px 36px;
+    }
+
+    .form-header {
+      margin-bottom: 26px;
+    }
+
+    .form-header h2 {
+      color: var(--orange);
+      font-size: 28px;
+      margin-bottom: 6px;
+    }
+
+    .form-header p {
+      font-size: 14px;
+      color: var(--gray-text);
+      line-height: 1.6;
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-bottom: 18px;
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 100px;
+      overflow: hidden;
+      transition:
+        opacity .35s ease,
+        transform .35s ease,
+        max-height .35s ease,
+        margin .35s ease,
+        padding .35s ease,
+        border-width .35s ease;
+    }
+
+    .message.success {
+      background: #e8f5e9;
+      color: var(--green);
+      border: 1px solid #c8e6c9;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: var(--red);
+      border: 1px solid #ffcdd2;
+    }
+
+    .message.hide {
+      opacity: 0;
+      transform: translateY(-8px);
+      max-height: 0;
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      border-width: 0;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1.5px solid var(--gray-mid);
+      border-radius: 10px;
+      padding: 11px 13px;
+      font-family: var(--font);
+      font-size: 14px;
+      outline: none;
+      background: var(--white);
+      transition: border-color .2s, box-shadow .2s;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(180,83,9,.12);
+    }
+
+    .submit-btn {
+      width: 100%;
+      background: var(--orange);
+      color: var(--white);
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+      margin-top: 18px;
+    }
+
+    .submit-btn:hover {
+      background: var(--orange-dark);
+      transform: translateY(-1px);
+    }
+
+    .bottom-links {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--gray-text);
+    }
+
+    .bottom-links a {
+      color: var(--blue);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .bottom-links a:hover {
+      text-decoration: underline;
+    }
+
+    .password-warning {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #ffebee;
+      color: var(--red);
+      border: 1px solid #ffcdd2;
+      font-size: 12px;
+    }
+
+    @media (max-width: 950px) {
+      .register-container {
+        grid-template-columns: 1fr;
+      }
+
+      .info-panel {
+        min-height: auto;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 650px) {
+      nav {
+        height: auto;
+        padding: 16px;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .nav-links {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .page-wrapper {
+        padding: 26px 14px;
+      }
+
+      .form-panel,
+      .info-panel {
+        padding: 30px 22px;
+      }
+
+      .info-panel h1 {
+        font-size: 28px;
+      }
+
+      .form-header h2 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <a th:href="@{/}" class="logo">
+    <svg viewBox="0 0 220 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text x="0" y="38" font-family="Poppins,sans-serif" font-weight="700" font-size="36" fill="#FFC72C">expedia</text>
+    </svg>
+  </a>
+
+  <div class="nav-links">
+    <a th:href="@{/}">Home</a>
+    <a th:href="@{/register}">Traveler Register</a>
+    <a th:href="@{/login}" class="signin">Sign In</a>
+  </div>
+</nav>
+
+<main class="page-wrapper">
+  <div class="register-container">
+
+    <section class="info-panel">
+      <div class="info-content">
+        <span class="badge">STAFF REGISTRATION</span>
+
+        <h1>Create a <span>Staff Account</span></h1>
+
+        <p>
+          Register staff members under an approved flight provider. The account will be sent to that provider for approval before the staff member can log in.
+        </p>
+
+        <div class="feature-list">
+          <div class="feature-item">
+            <strong>🎫 Booking Assistance</strong>
+            <span>Staff can help monitor and manage customer travel bookings.</span>
+          </div>
+
+          <div class="feature-item">
+            <strong>👥 Customer Support</strong>
+            <span>Staff can assist users with account, trip, and booking concerns.</span>
+          </div>
+
+          <div class="feature-item">
+            <strong>📊 Staff Dashboard</strong>
+            <span>Staff members can access a dedicated dashboard for daily operations.</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="small-note">
+        After registration, the selected flight provider must approve the staff account before login access is allowed.
+      </p>
+    </section>
+
+    <section class="form-panel">
+      <div class="form-header">
+        <h2>Staff Registration</h2>
+        <p>Fill out the details below. The account stays pending until the selected flight provider approves it.</p>
+      </div>
+
+      <div th:if="${successMessage}" class="message success" th:text="${successMessage}">
+        Staff account created successfully.
+      </div>
+
+      <div th:if="${errorMessage}" class="message error" th:text="${errorMessage}">
+        Something went wrong.
+      </div>
+
+      <form id="staffRegisterForm" th:action="@{/staffRegistration}" th:object="${staff}" method="post">
+
+        <div class="form-grid">
+
+          <div class="field-group">
+            <label for="firstName">First Name</label>
+            <input
+              type="text"
+              id="firstName"
+              th:field="*{firstName}"
+              placeholder="First name"
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="lastName">Last Name</label>
+            <input
+              type="text"
+              id="lastName"
+              th:field="*{lastName}"
+              placeholder="Last name"
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="emailAddress">Email Address</label>
+            <input
+              type="email"
+              id="emailAddress"
+              th:field="*{emailAddress}"
+              placeholder="staff@email.com"
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="contactNumber">Contact Number</label>
+            <input
+              type="text"
+              id="contactNumber"
+              th:field="*{contactNumber}"
+              placeholder="09XXXXXXXXX"
+              required
+            />
+          </div>
+
+          <div class="field-group full">
+            <label for="flightProviderId">Flight Provider Company</label>
+            <select id="flightProviderId" name="flightProviderId" required>
+              <option value="" selected disabled>Select approved flight provider</option>
+              <option th:if="${flightProviders == null or #lists.isEmpty(flightProviders)}" value="" disabled>No approved flight providers available yet</option>
+              <option
+                th:each="provider : ${flightProviders}"
+                th:value="${provider.flightProviderId}"
+                th:text="${provider.companyName + ' - ' + provider.providerType}">
+                Cebu Air Travel - Airline
+              </option>
+            </select>
+          </div>
+
+          <div class="field-group full">
+            <label for="staffRole">Staff Role</label>
+            <select id="staffRole" th:field="*{staffRole}" required>
+              <option value="" selected disabled>Select staff role</option>
+              <option value="Booking Staff">Booking Staff</option>
+              <option value="Customer Support">Customer Support</option>
+              <option value="Flight Operations Staff">Flight Operations Staff</option>
+              <option value="Gate Operations Staff">Gate Operations Staff</option>
+            </select>
+          </div>
+
+          <div class="field-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              th:field="*{password}"
+              placeholder="Create password"
+              required
+            />
+          </div>
+
+          <div class="field-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              placeholder="Confirm password"
+              required
+            />
+          </div>
+
+        </div>
+
+        <div id="passwordWarning" class="password-warning">
+          Password and confirm password do not match.
+        </div>
+
+        <button type="submit" class="submit-btn">
+          Submit Staff Account for Provider Approval
+        </button>
+      </form>
+
+      <div class="bottom-links">
+        Already have a staff account?
+        <a th:href="@{/login}">Log in here</a>
+        <br/>
+        <a th:href="@{/login}">Back to customer login</a>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const messages = document.querySelectorAll(".message");
+
+    messages.forEach(function (message) {
+      setTimeout(function () {
+        message.classList.add("hide");
+
+        setTimeout(function () {
+          message.remove();
+        }, 400);
+
+      }, 2000);
+    });
+
+    const form = document.getElementById("staffRegisterForm");
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirmPassword");
+    const passwordWarning = document.getElementById("passwordWarning");
+
+    form.addEventListener("submit", function (event) {
+      if (password.value !== confirmPassword.value) {
+        event.preventDefault();
+
+        passwordWarning.style.display = "block";
+
+        setTimeout(function () {
+          passwordWarning.style.display = "none";
+        }, 2000);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
