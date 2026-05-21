@@ -606,13 +606,19 @@
 
         <div class="field-group">
           <label for="phoneNumber">Phone Number</label>
-          <input 
-            type="tel" 
-            id="phoneNumber" 
-            name="phoneNumber" 
-            placeholder="09XXXXXXXXX" 
-            required
-          />
+            <input
+              type="tel"
+              id="phoneNumber"
+              name="phoneNumber"
+              placeholder="09XXXXXXXXX"
+              required
+              maxlength="11"
+              minlength="11"
+              pattern="^09\d{9}$"
+              title="Phone number must start with 09 and contain 11 digits"
+              inputmode="numeric"
+              oninput="this.value = this.value.replace(/\D/g, '')"
+               />
         </div>
 
         <div class="form-row">
@@ -670,10 +676,13 @@
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
+
     const alerts = document.querySelectorAll(".alert");
 
     alerts.forEach(function (alertBox) {
+
       setTimeout(function () {
+
         alertBox.classList.add("hide");
 
         setTimeout(function () {
@@ -681,24 +690,43 @@
         }, 400);
 
       }, 2000);
+
     });
 
     const form = document.getElementById("registerForm");
+
     const password = document.getElementById("password");
     const confirmPassword = document.getElementById("confirmPassword");
+
     const passwordWarning = document.getElementById("passwordWarning");
 
+    function validatePasswords() {
+
+      if (confirmPassword.value === "") {
+        passwordWarning.style.display = "none";
+        return;
+      }
+
+      if (password.value !== confirmPassword.value) {
+        passwordWarning.style.display = "block";
+      } else {
+        passwordWarning.style.display = "none";
+      }
+
+    }
+
+    password.addEventListener("input", validatePasswords);
+    confirmPassword.addEventListener("input", validatePasswords);
+
     form.addEventListener("submit", function (event) {
+
       if (password.value !== confirmPassword.value) {
         event.preventDefault();
-
         passwordWarning.style.display = "block";
-
-        setTimeout(function () {
-          passwordWarning.style.display = "none";
-        }, 2000);
       }
+
     });
+
   });
 </script>
 
